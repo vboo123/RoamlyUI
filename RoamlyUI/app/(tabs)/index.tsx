@@ -59,7 +59,7 @@ export default function HomeScreen({ navigation }) {
       <Card.Actions>
         <Button
           mode="contained"
-          onPress={() => console.log(`Viewing ${item.name}`)}
+          onPress={() => console.log(`Viewing ${item.city}`)}
         >
           View Details
         </Button>
