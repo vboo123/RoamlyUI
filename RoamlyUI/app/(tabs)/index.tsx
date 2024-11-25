@@ -45,14 +45,20 @@ export default function HomeScreen({ navigation }) {
   // Fetch properties only after getting the user's location
   useEffect(() => {
     if (userLocation) {
+      console.log(userLocation);
       const fetchProperties = async () => {
         try {
+          const { latitude, longitude } = userLocation;
+
+          // Modify the API URL to include the user's location as query parameters
           const response = await fetch(
-            "http://192.168.1.68:8000/get-properties/"
+            `http://192.168.1.68:8000/get-properties/?lat=${latitude}&long=${longitude}`
           );
+
           if (!response.ok) {
             throw new Error("Failed to fetch properties.");
           }
+
           const data = await response.json();
 
           // Extract properties from the response
