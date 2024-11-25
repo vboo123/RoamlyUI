@@ -8,40 +8,70 @@ import {
 } from "react-native";
 import { Card, Text, Button } from "react-native-paper";
 import AppBar from "../../components/AppBar";
+import * as Location from "expo-location"; // Import location module
 
 export default function HomeScreen({ navigation }) {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userLocation, setUserLocation] = useState(null); // State to store the user's location
 
-  // Fetch properties from the API
+  // Fetch the user's location
   useEffect(() => {
-    const fetchProperties = async () => {
+    const getUserLocation = async () => {
       try {
-        const response = await fetch(
-          "http://192.168.1.68:8000/get-properties/"
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch properties.");
+        // Request location permissions
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Permission Denied",
+            "Location permission is required to fetch properties near you."
+          );
+          return;
         }
-        const data = await response.json();
 
-        // Extract properties from the response
-        if (data && data.properties) {
-          setProperties(data.properties);
-        } else {
-          throw new Error("Invalid response format.");
-        }
+        // Get the current location of the user
+        const location = await Location.getCurrentPositionAsync({});
+        setUserLocation(location.coords); // Store the user's location
       } catch (err) {
-        setError(err.message);
-        Alert.alert("Error", err.message);
-      } finally {
-        setLoading(false);
+        setError("Failed to get user location.");
+        Alert.alert("Error", "Failed to get user location.");
       }
     };
 
-    fetchProperties();
+    getUserLocation();
   }, []);
+
+  // Fetch properties only after getting the user's location
+  useEffect(() => {
+    if (userLocation) {
+      const fetchProperties = async () => {
+        try {
+          const response = await fetch(
+            "http://192.168.1.68:8000/get-properties/"
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch properties.");
+          }
+          const data = await response.json();
+
+          // Extract properties from the response
+          if (data && data.properties) {
+            setProperties(data.properties);
+          } else {
+            throw new Error("Invalid response format.");
+          }
+        } catch (err) {
+          setError(err.message);
+          Alert.alert("Error", err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchProperties();
+    }
+  }, [userLocation]); // Only trigger the fetch after the user's location is available
 
   const renderProperty = ({ item }) => (
     <Card style={styles.card} mode="elevated">
