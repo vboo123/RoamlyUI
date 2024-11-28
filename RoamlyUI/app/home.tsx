@@ -7,10 +7,10 @@ import {
   Alert,
 } from "react-native";
 import { Card, Text, Button } from "react-native-paper";
-import AppBar from "../../components/AppBar";
+import AppBar from "../components/AppBar";
 import * as Location from "expo-location"; // Import location module
 
-export default function HomeScreen({ navigation }) {
+export default function Home({ navigation }) {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
