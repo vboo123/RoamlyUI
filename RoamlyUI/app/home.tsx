@@ -9,8 +9,10 @@ import {
 import { Card, Text, Button } from "react-native-paper";
 import AppBar from "../components/AppBar";
 import * as Location from "expo-location"; // Import location module
+import { useRouter } from "expo-router"; // Import the router
 
 export default function Home({ navigation }) {
+  const router = useRouter(); // Initialize router
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,7 +97,14 @@ export default function Home({ navigation }) {
       <Card.Actions>
         <Button
           mode="contained"
-          onPress={() => console.log(`Viewing ${item.city}`)}
+          onPress={() =>
+            router.push({
+              pathname: "/details",
+              params: {
+                item: JSON.stringify(item), // Serialize the object
+              },
+            })
+          }
         >
           View Details
         </Button>
