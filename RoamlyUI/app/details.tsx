@@ -3,8 +3,9 @@ import { View, StyleSheet, ScrollView } from "react-native";
 import { Text } from "react-native-paper";
 import { useLocalSearchParams } from "expo-router";
 import * as Speech from "expo-speech";
+import AppBar from "../components/AppBar";
 
-export default function Details() {
+export default function Details({ navigation }) {
   const { item } = useLocalSearchParams();
   const parsedItem = item ? JSON.parse(item) : null; // Parse the serialized object
 
@@ -22,7 +23,9 @@ export default function Details() {
       );
     }, 500); // Adjust interval for reading speed (e.g., 500ms per word)
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval); // Clear interval on component unmount
+    };
   }, [words]);
 
   useEffect(() => {
@@ -32,6 +35,10 @@ export default function Details() {
         onDone: () => setHighlightedIndex(-1),
       });
     }
+
+    return () => {
+      Speech.stop(); // Stop speech synthesis on component unmount
+    };
   }, [textContent]);
 
   if (!parsedItem) {
@@ -44,6 +51,7 @@ export default function Details() {
 
   return (
     <View style={styles.container}>
+      <AppBar title="Details" navigation={navigation} />
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Text style={styles.text}>
           {words.map((word, index) => (

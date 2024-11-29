@@ -1,15 +1,19 @@
 import React from "react";
 import { Appbar, Menu } from "react-native-paper";
 import { StyleSheet } from "react-native";
+import { useRouter } from "expo-router"; // Import useRouter for navigation
 
-const AppBar = ({ title, navigation }) => {
+const AppBar = ({ title }) => {
   const [menuVisible, setMenuVisible] = React.useState(false);
+  const router = useRouter(); // Initialize router
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
   const closeMenu = () => setMenuVisible(false);
 
   return (
     <Appbar.Header style={styles.header}>
+      <Appbar.BackAction onPress={router.back} color="white" />{" "}
+      {/* Back button */}
       <Appbar.Content title={title} titleStyle={styles.title} />
       <Menu
         visible={menuVisible}
@@ -25,14 +29,14 @@ const AppBar = ({ title, navigation }) => {
         <Menu.Item
           onPress={() => {
             closeMenu();
-            navigation.navigate("Profile");
+            router.push("/profile"); // Navigate to Profile page
           }}
           title="Profile"
         />
         <Menu.Item
           onPress={() => {
             closeMenu();
-            navigation.navigate("Settings");
+            router.push("/settings"); // Navigate to Settings page
           }}
           title="Settings"
         />
