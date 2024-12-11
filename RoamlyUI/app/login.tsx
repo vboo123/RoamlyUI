@@ -29,6 +29,7 @@ export default function Login({ navigation }) {
         <Text style={styles.welcomeText}>Welcome</Text>
       </View>
       <Button onPress={() => router.push("/home")} title="Login with Google" />
+      <Button onPress={() => router.push("/register")} title="Register" />
     </View>
   );
 }
