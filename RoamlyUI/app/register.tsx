@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import axios from "axios";
 
@@ -59,10 +60,15 @@ const Register = () => {
   };
 
   return (
-    <ScrollView>
-      <Text>Register</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Register</Text>
 
-      <TextInput placeholder="Name" value={name} onChangeText={setName} />
+      <TextInput
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
+        style={styles.input}
+      />
 
       <TextInput
         placeholder="Email"
@@ -70,30 +76,35 @@ const Register = () => {
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
+        style={styles.input}
       />
 
       <TextInput
         placeholder="Country"
         value={country}
         onChangeText={setCountry}
+        style={styles.input}
       />
 
       <TextInput
         placeholder="Interest One"
         value={interestOne}
         onChangeText={setInterestOne}
+        style={styles.input}
       />
 
       <TextInput
         placeholder="Interest Two"
         value={interestTwo}
         onChangeText={setInterestTwo}
+        style={styles.input}
       />
 
       <TextInput
         placeholder="Interest Three"
         value={interestThree}
         onChangeText={setInterestThree}
+        style={styles.input}
       />
 
       <TextInput
@@ -101,36 +112,53 @@ const Register = () => {
         keyboardType="numeric"
         value={age}
         onChangeText={setAge}
+        style={styles.input}
       />
 
-      <Button title="Register" onPress={handleRegister} />
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
+        <Text style={styles.buttonText}>Register</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flexGrow: 1,
-//     padding: 20,
-//     backgroundColor: "#f5f5f5",
-//     justifyContent: "center",
-//   },
-//   title: {
-//     fontSize: 28,
-//     fontWeight: "bold",
-//     marginBottom: 20,
-//     textAlign: "center",
-//     color: "#333",
-//   },
-//   input: {
-//     height: 50,
-//     borderColor: "#ccc",
-//     borderWidth: 1,
-//     borderRadius: 8,
-//     paddingHorizontal: 15,
-//     marginBottom: 15,
-//     backgroundColor: "#fff",
-//   },
-// });
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: "#f0f4f8",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#2c3e50",
+  },
+  input: {
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    backgroundColor: "#fff",
+    fontSize: 16,
+    color: "#333",
+  },
+  button: {
+    backgroundColor: "#3498db",
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+});
 
 export default Register;
