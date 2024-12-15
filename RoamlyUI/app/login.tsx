@@ -1,35 +1,69 @@
-import React, { useState, useEffect } from "react";
-import { View, Button, Text, StyleSheet } from "react-native";
-import { useAuthRequest } from "expo-auth-session";
-import * as AuthSession from "expo-auth-session"; // Import AuthSession explicitly
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
-import { useRouter } from "expo-router"; // Import the router
+import React, { useState } from "react";
+import { View, Button, Text, TextInput, StyleSheet, Alert } from "react-native";
+import { useRouter } from "expo-router";
 
-// Enable web browser to handle redirects
-WebBrowser.maybeCompleteAuthSession();
-//https://stackoverflow.com/questions/70286836/how-to-fix-google-expo-auth-session-sign-in-error-something-went-wrong-when-try
-export default function Login({ navigation }) {
-  const router = useRouter(); // Initialize router
-  // const redirectUri = AuthSession.makeRedirectUri({});
-  // const redirectUri = "https://auth.expo.io/@vboo/RoamlyUI";
-  // const [request, response, promptAsync] = Google.useAuthRequest({
-  //   clientId:
-  //     "267213343250-0pa7u4cm48b9e9thtk19d935nuks7avf.apps.googleusercontent.com",
-  //   redirectUri,
-  // });
+export default function Login() {
+  const router = useRouter();
 
-  // useEffect(() => {
-  //   console.log(response);
-  // }, [response]);
+  // State for user inputs
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  // Function to call FastAPI login endpoint
+  const handleLogin = async () => {
+    if (!name || !email) {
+      Alert.alert("Input Error", "Please enter both name and email.");
+      return;
+    }
+
+    try {
+      // Construct the URL with query parameters
+      const url = `http://192.168.1.68:8000/login/?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        await router.push("/home");
+      } else {
+        Alert.alert("Login Failed", data.detail);
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert(
+        "Error",
+        "Unable to connect to the server. Please check your network and try again."
+      );
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.userInfoContainer}>
-        <Text style={styles.welcomeText}>Welcome</Text>
-      </View>
-      <Button onPress={() => router.push("/home")} title="Login with Google" />
-      <Button onPress={() => router.push("/register")} title="Register" />
+      <Text style={styles.welcomeText}>Login</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+      />
+
+      <Button title="Login" onPress={handleLogin} />
+      <Button title="Register" onPress={() => router.push("/register")} />
     </View>
   );
 }
@@ -42,16 +76,16 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
   },
-  userInfoContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
   welcomeText: {
-    fontSize: 18,
-    marginBottom: 10,
+    fontSize: 24,
+    marginBottom: 20,
   },
-  emailText: {
-    fontSize: 16,
-    color: "#555",
+  input: {
+    width: "100%",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 15,
   },
 });
