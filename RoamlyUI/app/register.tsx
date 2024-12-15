@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  Alert,
   ScrollView,
-  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
+import { Button, TextInput, Headline, Divider, Text } from "react-native-paper";
+import { Alert } from "react-native";
 import axios from "axios";
+import { router } from "expo-router";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -41,6 +41,7 @@ const Register = () => {
         `User registered successfully!\nUser ID: ${response.data.user_id}`
       );
       clearForm();
+      router.navigate("/login");
     } catch (error) {
       Alert.alert(
         "Registration Failed",
@@ -60,103 +61,133 @@ const Register = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Register</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView contentContainerStyle={styles.content}>
+        <Headline style={styles.headline}>Create Your Account</Headline>
+        <Divider style={styles.divider} />
 
-      <TextInput
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-        style={styles.input}
-      />
+        <TextInput
+          label="Name"
+          value={name}
+          onChangeText={setName}
+          mode="outlined"
+          style={styles.input}
+        />
 
-      <TextInput
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-      />
+        <TextInput
+          label="Email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+          mode="outlined"
+          style={styles.input}
+        />
 
-      <TextInput
-        placeholder="Country"
-        value={country}
-        onChangeText={setCountry}
-        style={styles.input}
-      />
+        <TextInput
+          label="Country"
+          value={country}
+          onChangeText={setCountry}
+          mode="outlined"
+          style={styles.input}
+        />
 
-      <TextInput
-        placeholder="Interest One"
-        value={interestOne}
-        onChangeText={setInterestOne}
-        style={styles.input}
-      />
+        <TextInput
+          label="Interest One"
+          value={interestOne}
+          onChangeText={setInterestOne}
+          mode="outlined"
+          style={styles.input}
+        />
 
-      <TextInput
-        placeholder="Interest Two"
-        value={interestTwo}
-        onChangeText={setInterestTwo}
-        style={styles.input}
-      />
+        <TextInput
+          label="Interest Two"
+          value={interestTwo}
+          onChangeText={setInterestTwo}
+          mode="outlined"
+          style={styles.input}
+        />
 
-      <TextInput
-        placeholder="Interest Three"
-        value={interestThree}
-        onChangeText={setInterestThree}
-        style={styles.input}
-      />
+        <TextInput
+          label="Interest Three"
+          value={interestThree}
+          onChangeText={setInterestThree}
+          mode="outlined"
+          style={styles.input}
+        />
 
-      <TextInput
-        placeholder="Age"
-        keyboardType="numeric"
-        value={age}
-        onChangeText={setAge}
-        style={styles.input}
-      />
+        <TextInput
+          label="Age"
+          keyboardType="numeric"
+          value={age}
+          onChangeText={setAge}
+          mode="outlined"
+          style={styles.input}
+        />
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Register</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Button
+          mode="contained"
+          onPress={handleRegister}
+          style={styles.button}
+          contentStyle={styles.buttonContent}
+        >
+          Register
+        </Button>
+
+        <Text style={styles.footerText}>
+          Already have an account?{" "}
+          <Text style={styles.link} onPress={() => router.navigate("/login")}>
+            Login
+          </Text>
+        </Text>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: "#f0f4f8",
-    justifyContent: "center",
+    flex: 1,
+    backgroundColor: "#f5f5f5",
   },
-  title: {
-    fontSize: 32,
+  content: {
+    padding: 20,
+    backgroundColor: "#fff",
+    margin: 20,
+    borderRadius: 10,
+    elevation: 4,
+  },
+  headline: {
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
     textAlign: "center",
-    color: "#2c3e50",
+    marginBottom: 20,
+    color: "#6200ee",
+  },
+  divider: {
+    marginBottom: 20,
   },
   input: {
-    height: 50,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 15,
     marginBottom: 15,
-    backgroundColor: "#fff",
-    fontSize: 16,
-    color: "#333",
   },
   button: {
-    backgroundColor: "#3498db",
-    paddingVertical: 15,
-    borderRadius: 12,
-    alignItems: "center",
     marginTop: 10,
+    backgroundColor: "#6200ee",
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
+  buttonContent: {
+    paddingVertical: 8,
+  },
+  footerText: {
+    marginTop: 20,
+    textAlign: "center",
+    fontSize: 14,
+    color: "#555",
+  },
+  link: {
+    color: "#6200ee",
     fontWeight: "bold",
   },
 });

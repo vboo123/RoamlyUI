@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { View, Button, Text, TextInput, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
+import { Button, Text, TextInput, Headline, Divider } from "react-native-paper";
+import { Alert } from "react-native";
 
 export default function Login() {
   const router = useRouter();
@@ -18,7 +20,9 @@ export default function Login() {
 
     try {
       // Construct the URL with query parameters
-      const url = `http://192.168.1.68:8000/login/?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+      const url = `http://192.168.1.68:8000/login/?name=${encodeURIComponent(
+        name
+      )}&email=${encodeURIComponent(email)}`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -44,27 +48,49 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.welcomeText}>Login</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={styles.content}>
+        <Headline style={styles.headline}>Welcome to Roamly</Headline>
+        <Divider style={styles.divider} />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
+        <TextInput
+          label="Name"
+          value={name}
+          onChangeText={setName}
+          mode="outlined"
+          style={styles.input}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
+        <TextInput
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          mode="outlined"
+          keyboardType="email-address"
+          style={styles.input}
+        />
 
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Register" onPress={() => router.push("/register")} />
-    </View>
+        <Button
+          mode="contained"
+          onPress={handleLogin}
+          style={styles.button}
+          contentStyle={styles.buttonContent}
+        >
+          Login
+        </Button>
+
+        <Button
+          mode="text"
+          onPress={() => router.push("/register")}
+          style={styles.registerButton}
+        >
+          Don't have an account? Register
+        </Button>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -72,20 +98,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#f5f5f5",
   },
-  welcomeText: {
-    fontSize: 24,
+  content: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    elevation: 4,
+  },
+  headline: {
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
+    color: "#6200ee",
+  },
+  divider: {
     marginBottom: 20,
   },
   input: {
-    width: "100%",
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
     marginBottom: 15,
+  },
+  button: {
+    marginTop: 10,
+    backgroundColor: "#6200ee",
+  },
+  buttonContent: {
+    paddingVertical: 8,
+  },
+  registerButton: {
+    marginTop: 10,
+    alignSelf: "center",
   },
 });

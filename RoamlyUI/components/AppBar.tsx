@@ -25,22 +25,7 @@ const AppBar = ({ title }) => {
             color="white"
           />
         }
-      >
-        <Menu.Item
-          onPress={() => {
-            closeMenu();
-            router.push("/profile"); // Navigate to Profile page
-          }}
-          title="Profile"
-        />
-        <Menu.Item
-          onPress={() => {
-            closeMenu();
-            router.push("/settings"); // Navigate to Settings page
-          }}
-          title="Settings"
-        />
-      </Menu>
+      ></Menu>
     </Appbar.Header>
   );
 };
