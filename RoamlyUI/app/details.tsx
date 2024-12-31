@@ -13,8 +13,20 @@ const textContent =
 
 export default function LyricsScreen() {
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [selectedVoice, setSelectedVoice] = useState(null);
   const words = textContent.split(" ");
   const scrollRef = useRef(null);
+
+  // Fetch available voices and select a pleasant one
+  useEffect(() => {
+    Speech.getAvailableVoicesAsync().then((voices) => {
+      const pleasantVoice = voices.find(
+        (voice) =>
+          voice.language.startsWith("en") && voice.quality === "Enhanced" // High-quality voices
+      );
+      setSelectedVoice(pleasantVoice?.identifier || null);
+    });
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,10 +42,20 @@ export default function LyricsScreen() {
     Speech.speak(textContent, {
       onStart: () => setHighlightedIndex(0),
       onDone: () => setHighlightedIndex(-1),
+      pitch: 1.2, // Adjust for tone (1 is default, higher is higher-pitched)
+      rate: 0.9, // Adjust for slower or faster speech
+      voice: selectedVoice, // Use the selected voice
+      onWord: (event) => {
+        // Event callback to track word progress
+        const currentWordIndex = words.indexOf(event?.word);
+        if (currentWordIndex !== -1) {
+          setHighlightedIndex(currentWordIndex);
+        }
+      },
     });
 
     return () => Speech.stop();
-  }, [textContent]);
+  }, [textContent, selectedVoice]);
 
   useEffect(() => {
     // Scroll to the highlighted word
@@ -49,7 +71,11 @@ export default function LyricsScreen() {
     setHighlightedIndex(index);
     Speech.stop();
     const newText = words.slice(index).join(" ");
-    Speech.speak(newText);
+    Speech.speak(newText, {
+      pitch: 1.2,
+      rate: 0.9,
+      voice: selectedVoice,
+    });
   };
 
   return (
