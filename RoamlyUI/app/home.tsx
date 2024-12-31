@@ -1,116 +1,50 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
-  FlatList,
   StyleSheet,
   View,
+  Animated,
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { Card, Text, Button } from "react-native-paper";
-import AppBar from "../components/AppBar";
-import * as Location from "expo-location"; // Import location module
-import { useRouter } from "expo-router"; // Import the router
+import { Text, Button } from "react-native-paper";
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
 
 export default function Home({ navigation }) {
-  const router = useRouter(); // Initialize router
-  const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [userLocation, setUserLocation] = useState(null); // State to store the user's location
+  const router = useRouter();
+  const [lyrics, setLyrics] = useState([
+    "Welcome to your journey!",
+    "Discover landmarks around you.",
+    "Engage with your interests.",
+    "Explore new adventures.",
+  ]);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch the user's location
-  useEffect(() => {
-    const getUserLocation = async () => {
-      try {
-        // Request location permissions
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert(
-            "Permission Denied",
-            "Location permission is required to fetch properties near you."
-          );
-          return;
-        }
+  const scrollY = useRef(new Animated.Value(0)).current;
 
-        // Get the current location of the user
-        const location = await Location.getCurrentPositionAsync({});
-        setUserLocation(location.coords); // Store the user's location
-      } catch (err) {
-        setError("Failed to get user location.");
-        Alert.alert("Error", "Failed to get user location.");
-      }
-    };
+  const renderLyric = ({ item, index }) => {
+    const inputRange = [(index - 1) * 50, index * 50, (index + 1) * 50];
 
-    getUserLocation();
-  }, []);
+    const scale = scrollY.interpolate({
+      inputRange,
+      outputRange: [0.8, 1, 0.8],
+      extrapolate: "clamp",
+    });
 
-  // Fetch properties only after getting the user's location
-  useEffect(() => {
-    if (userLocation) {
-      console.log(userLocation);
-      const fetchProperties = async () => {
-        try {
-          const { latitude, longitude } = userLocation;
+    const opacity = scrollY.interpolate({
+      inputRange,
+      outputRange: [0.5, 1, 0.5],
+      extrapolate: "clamp",
+    });
 
-          // Modify the API URL to include the user's location as query parameters
-          const response = await fetch(
-            `http://192.168.1.68:8000/get-properties/?lat=${latitude}&long=${longitude}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch properties.");
-          }
-
-          const data = await response.json();
-
-          // Extract properties from the response
-          if (data && data.properties) {
-            setProperties(data.properties);
-          } else {
-            throw new Error("Invalid response format.");
-          }
-        } catch (err) {
-          setError(err.message);
-          Alert.alert("Error", err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchProperties();
-    }
-  }, [userLocation]); // Only trigger the fetch after the user's location is available
-
-  const renderProperty = ({ item }) => (
-    <Card style={styles.card} mode="elevated">
-      <Card.Content>
-        <Text variant="titleLarge" style={styles.title}>
-          {item.name}
-        </Text>
-        <Text variant="bodyMedium" style={styles.description}>
-          {item.city}, {item.country}
-        </Text>
-        <Text variant="bodyLarge" style={styles.geohash}>
-          Geohash: {item.geohash_code}
-        </Text>
-      </Card.Content>
-      <Card.Actions>
-        <Button
-          mode="contained"
-          onPress={() =>
-            router.push({
-              pathname: "/details",
-              params: {
-                item: JSON.stringify(item), // Serialize the object
-              },
-            })
-          }
-        >
-          View Details
-        </Button>
-      </Card.Actions>
-    </Card>
-  );
+    return (
+      <Animated.View
+        style={[styles.lyricContainer, { transform: [{ scale }], opacity }]}
+      >
+        <Text style={styles.lyric}>{item}</Text>
+      </Animated.View>
+    );
+  };
 
   if (loading) {
     return (
@@ -120,25 +54,27 @@ export default function Home({ navigation }) {
     );
   }
 
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text variant="bodyLarge" style={{ color: "red" }}>
-          {error}
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <AppBar title="Home" navigation={navigation} />
-      <FlatList
-        data={properties}
-        renderItem={renderProperty}
-        keyExtractor={(item) => item.property_id} // Use the unique property_id as the key
+      <Animated.FlatList
+        data={lyrics}
+        renderItem={renderLyric}
+        keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
       />
+      <Button
+        mode="contained"
+        style={styles.button}
+        onPress={() => router.push("/details")}
+      >
+        Explore More
+      </Button>
     </View>
   );
 }
@@ -146,33 +82,30 @@ export default function Home({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-    paddingHorizontal: 10,
+    backgroundColor: "#121212",
+    justifyContent: "center",
+    padding: 20,
   },
   listContent: {
-    paddingVertical: 10,
+    paddingVertical: 50,
   },
-  card: {
-    marginBottom: 15,
-    borderRadius: 10,
-    overflow: "hidden",
+  lyricContainer: {
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  title: {
-    marginBottom: 5,
-    fontWeight: "bold",
-  },
-  description: {
-    marginBottom: 5,
-    color: "#666",
-  },
-  geohash: {
-    color: "#007BFF",
-    fontWeight: "bold",
-    marginBottom: 10,
+  lyric: {
+    fontSize: 24,
+    color: "#fff",
+    textAlign: "center",
   },
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  button: {
+    marginTop: 20,
+    alignSelf: "center",
   },
 });

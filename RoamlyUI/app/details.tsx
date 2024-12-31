@@ -1,71 +1,80 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
-import { Text } from "react-native-paper";
-import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Text as NativeText,
+  TouchableWithoutFeedback,
+  ScrollView,
+} from "react-native";
 import * as Speech from "expo-speech";
-import AppBar from "../components/AppBar";
 
-export default function Details({ navigation }) {
-  const { item } = useLocalSearchParams();
-  const parsedItem = item ? JSON.parse(item) : null; // Parse the serialized object
+const textContent =
+  "The Hollywood Sign, perched atop Mount Lee in the Hollywood Hills of Los Angeles, is an iconic symbol of the entertainment industry. Originally erected in 1923 as Hollywoodland to advertise a real estate development, the sign has since become synonymous with the glitz and glamour of Hollywood. Standing 45 feet tall and stretching 350 feet wide, it offers sweeping views of the city and serves as a cultural landmark, drawing visitors from around the world. Over the decades, the sign has been restored and preserved, cementing its status as a beacon of ambition and creativity.";
 
+export default function LyricsScreen() {
   const [highlightedIndex, setHighlightedIndex] = useState(0);
-
-  const textContent = parsedItem?.mediumresponseindiacarsshopping || "";
   const words = textContent.split(" ");
+  const scrollRef = useRef(null);
 
   useEffect(() => {
-    if (words.length === 0) return;
-
     const interval = setInterval(() => {
       setHighlightedIndex((prevIndex) =>
         prevIndex < words.length - 1 ? prevIndex + 1 : prevIndex
       );
-    }, 500); // Adjust interval for reading speed (e.g., 500ms per word)
+    }, 500); // Adjust interval for reading speed
 
-    return () => {
-      clearInterval(interval); // Clear interval on component unmount
-    };
+    return () => clearInterval(interval);
   }, [words]);
 
   useEffect(() => {
-    if (words.length > 0) {
-      Speech.speak(textContent, {
-        onStart: () => setHighlightedIndex(0),
-        onDone: () => setHighlightedIndex(-1),
-      });
-    }
+    Speech.speak(textContent, {
+      onStart: () => setHighlightedIndex(0),
+      onDone: () => setHighlightedIndex(-1),
+    });
 
-    return () => {
-      Speech.stop(); // Stop speech synthesis on component unmount
-    };
+    return () => Speech.stop();
   }, [textContent]);
 
-  if (!parsedItem) {
-    return (
-      <View style={styles.centeredContainer}>
-        <Text>No data available</Text>
-      </View>
-    );
-  }
+  useEffect(() => {
+    // Scroll to the highlighted word
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        y: highlightedIndex * 40, // Adjust based on word height
+        animated: true,
+      });
+    }
+  }, [highlightedIndex]);
+
+  const handleWordPress = (index) => {
+    setHighlightedIndex(index);
+    Speech.stop();
+    const newText = words.slice(index).join(" ");
+    Speech.speak(newText);
+  };
 
   return (
     <View style={styles.container}>
-      <AppBar title="Details" navigation={navigation} />
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <Text style={styles.text}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <View style={styles.wordsContainer}>
           {words.map((word, index) => (
-            <Text
+            <TouchableWithoutFeedback
               key={index}
-              style={[
-                styles.word,
-                index === highlightedIndex && styles.highlightedWord,
-              ]}
+              onPress={() => handleWordPress(index)}
             >
-              {word + " "}
-            </Text>
+              <NativeText
+                style={[
+                  styles.word,
+                  index === highlightedIndex && styles.highlightedWord,
+                ]}
+              >
+                {word + " "}
+              </NativeText>
+            </TouchableWithoutFeedback>
           ))}
-        </Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -74,25 +83,24 @@ export default function Details({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#fff",
   },
   scrollViewContent: {
-    paddingVertical: 10,
+    paddingVertical: 20,
   },
-  text: {
-    fontSize: 18,
-    lineHeight: 24,
+  wordsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 16,
   },
   word: {
+    fontSize: 18,
+    margin: 5,
     color: "#000",
   },
   highlightedWord: {
     backgroundColor: "yellow",
-  },
-  centeredContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    color: "#000",
+    fontWeight: "bold",
   },
 });
