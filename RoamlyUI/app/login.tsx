@@ -1,8 +1,18 @@
 import React, { useState } from "react";
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from "react-native";
 import { useRouter } from "expo-router";
-import { Button, Text, TextInput, Headline, Divider } from "react-native-paper";
-import { Alert } from "react-native";
+import { Button, TextInput, Headline, Divider } from "react-native-paper";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
+import { useEffect } from "react";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
   const router = useRouter();
@@ -11,7 +21,39 @@ export default function Login() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  // Function to call FastAPI login endpoint
+  // Google Sign-In setup
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId:
+      "267213343250-3q926vgjgv1dsf7arf97v86gajklrm8l.apps.googleusercontent.com",
+    iosClientId: "<YOUR_IOS_CLIENT_ID>",
+    androidClientId: "<YOUR_ANDROID_CLIENT_ID>",
+  });
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { authentication } = response;
+      fetchUserInfo(authentication.accessToken);
+    }
+  }, [response]);
+
+  const fetchUserInfo = async (accessToken) => {
+    try {
+      const userInfoResponse = await fetch(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      const user = await userInfoResponse.json();
+      Alert.alert("Login Successful", `Welcome, ${user.name}`);
+      router.push("/home");
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      Alert.alert("Error", "Could not retrieve user information.");
+    }
+  };
+
+  // Handle manual login
   const handleLogin = async () => {
     if (!name || !email) {
       Alert.alert("Input Error", "Please enter both name and email.");
@@ -19,7 +61,6 @@ export default function Login() {
     }
 
     try {
-      // Construct the URL with query parameters
       const url = `http://192.168.1.68:8000/login/?name=${encodeURIComponent(
         name
       )}&email=${encodeURIComponent(email)}`;
@@ -34,7 +75,7 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        await router.push("/home");
+        router.push("/home");
       } else {
         Alert.alert("Login Failed", data.detail);
       }
@@ -83,6 +124,16 @@ export default function Login() {
         </Button>
 
         <Button
+          mode="contained"
+          onPress={() => promptAsync()}
+          disabled={!request}
+          style={styles.googleButton}
+          contentStyle={styles.buttonContent}
+        >
+          Sign in with Google
+        </Button>
+
+        <Button
           mode="text"
           onPress={() => router.push("/register")}
           style={styles.registerButton}
@@ -123,6 +174,10 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     backgroundColor: "#6200ee",
+  },
+  googleButton: {
+    marginTop: 10,
+    backgroundColor: "#db4437",
   },
   buttonContent: {
     paddingVertical: 8,
