@@ -5,29 +5,60 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  FlatList,
+  TouchableOpacity,
 } from "react-native";
-import { Button, TextInput, Headline, Divider, Text } from "react-native-paper";
+import {
+  Button,
+  TextInput,
+  Headline,
+  Divider,
+  Text,
+  Checkbox,
+} from "react-native-paper";
 import { Alert } from "react-native";
 import axios from "axios";
 import { router } from "expo-router";
+
+const interestOptions = [
+  "Sports",
+  "Music",
+  "Travel",
+  "Reading",
+  "Technology",
+  "Cooking",
+  "Fitness",
+  "Gaming",
+  "Art",
+];
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("");
-  const [interestOne, setInterestOne] = useState("");
-  const [interestTwo, setInterestTwo] = useState("");
-  const [interestThree, setInterestThree] = useState("");
+  const [selectedInterests, setSelectedInterests] = useState([]);
   const [age, setAge] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const toggleInterest = (interest) => {
+    if (selectedInterests.includes(interest)) {
+      setSelectedInterests(
+        selectedInterests.filter((item) => item !== interest)
+      );
+    } else if (selectedInterests.length < 3) {
+      setSelectedInterests([...selectedInterests, interest]);
+    } else {
+      Alert.alert("Limit Reached", "You can select up to 3 interests.");
+    }
+  };
 
   const handleRegister = async () => {
     const userData = {
       name,
       email,
       country,
-      interestOne,
-      interestTwo,
-      interestThree,
+      interests: selectedInterests,
       age,
     };
 
@@ -54,9 +85,7 @@ const Register = () => {
     setName("");
     setEmail("");
     setCountry("");
-    setInterestOne("");
-    setInterestTwo("");
-    setInterestThree("");
+    setSelectedInterests([]);
     setAge("");
   };
 
@@ -95,29 +124,53 @@ const Register = () => {
           style={styles.input}
         />
 
-        <TextInput
-          label="Interest One"
-          value={interestOne}
-          onChangeText={setInterestOne}
-          mode="outlined"
-          style={styles.input}
-        />
+        <TouchableOpacity
+          style={styles.interestSelector}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.interestSelectorText}>
+            {selectedInterests.length > 0
+              ? selectedInterests.join(", ")
+              : "Select Interests (up to 3)"}
+          </Text>
+        </TouchableOpacity>
 
-        <TextInput
-          label="Interest Two"
-          value={interestTwo}
-          onChangeText={setInterestTwo}
-          mode="outlined"
-          style={styles.input}
-        />
-
-        <TextInput
-          label="Interest Three"
-          value={interestThree}
-          onChangeText={setInterestThree}
-          mode="outlined"
-          style={styles.input}
-        />
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Headline style={styles.modalHeadline}>Select Interests</Headline>
+              <FlatList
+                data={interestOptions}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <View style={styles.checkboxContainer}>
+                    <Checkbox
+                      status={
+                        selectedInterests.includes(item)
+                          ? "checked"
+                          : "unchecked"
+                      }
+                      onPress={() => toggleInterest(item)}
+                    />
+                    <Text style={styles.checkboxLabel}>{item}</Text>
+                  </View>
+                )}
+              />
+              <Button
+                mode="contained"
+                onPress={() => setModalVisible(false)}
+                style={styles.modalButton}
+              >
+                Done
+              </Button>
+            </View>
+          </View>
+        </Modal>
 
         <TextInput
           label="Age"
@@ -189,6 +242,48 @@ const styles = StyleSheet.create({
   link: {
     color: "#6200ee",
     fontWeight: "bold",
+  },
+  interestSelector: {
+    marginBottom: 15,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: "#6200ee",
+    borderRadius: 5,
+  },
+  interestSelectorText: {
+    color: "#6200ee",
+    fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    margin: 20,
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5,
+  },
+  modalHeadline: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  checkboxLabel: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  modalButton: {
+    marginTop: 20,
+    backgroundColor: "#6200ee",
   },
 });
 
