@@ -6,47 +6,42 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import {
-  Button,
-  TextInput,
-  Headline,
-  Divider,
-  Text,
-  Chip,
-} from "react-native-paper";
+import { Button, TextInput, Headline, Divider, Text } from "react-native-paper";
+import CountryPicker from "react-native-country-picker-modal";
 import { Alert } from "react-native";
 import axios from "axios";
 import { router } from "expo-router";
 
+const interestsList = [
+  "Technology",
+  "Travel",
+  "Cooking",
+  "Fitness",
+  "Music",
+  "Photography",
+  "Sports",
+  "Gaming",
+  "Art",
+  "Writing",
+  "Science",
+  "Movies",
+];
+
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [country, setCountry] = useState("");
-  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [country, setCountry] = useState(null);
   const [age, setAge] = useState("");
+  const [countryCode, setCountryCode] = useState("US"); // Default country
+  const [selectedInterests, setSelectedInterests] = useState([]);
 
-  const interestsList = [
-    "Travel",
-    "Food",
-    "Technology",
-    "Sports",
-    "Fitness",
-    "Art",
-    "Music",
-    "Reading",
-    "Gaming",
-    "Photography",
-  ];
-
-  const handleSelectInterest = (interest) => {
+  const handleInterestSelection = (interest) => {
     if (selectedInterests.includes(interest)) {
-      // Remove interest if it's already selected
-      setSelectedInterests(selectedInterests.filter((i) => i !== interest));
+      setSelectedInterests((prev) => prev.filter((item) => item !== interest));
     } else if (selectedInterests.length < 3) {
-      // Add interest if less than 3 are selected
-      setSelectedInterests([...selectedInterests, interest]);
+      setSelectedInterests((prev) => [...prev, interest]);
     } else {
-      Alert.alert("Limit Reached", "You can select up to 3 interests only.");
+      Alert.alert("Limit Reached", "You can only select up to 3 interests.");
     }
   };
 
@@ -81,9 +76,9 @@ const Register = () => {
   const clearForm = () => {
     setName("");
     setEmail("");
-    setCountry("");
-    setSelectedInterests([]);
+    setCountry(null);
     setAge("");
+    setSelectedInterests([]);
   };
 
   return (
@@ -113,33 +108,23 @@ const Register = () => {
           style={styles.input}
         />
 
-        <TextInput
-          label="Country"
-          value={country}
-          onChangeText={setCountry}
-          mode="outlined"
-          style={styles.input}
+        {/* Country Selector */}
+        <CountryPicker
+          countryCode={countryCode}
+          withFilter
+          withFlag
+          withCountryNameButton
+          withAlphaFilter
+          onSelect={(country) => {
+            setCountry(country.name);
+            setCountryCode(country.cca2);
+          }}
         />
-
-        <Text style={styles.subheading}>Select up to 3 Interests</Text>
-        <View style={styles.chipContainer}>
-          {interestsList.map((interest) => (
-            <Chip
-              key={interest}
-              style={[
-                styles.chip,
-                selectedInterests.includes(interest) && styles.chipSelected,
-              ]}
-              textStyle={[
-                styles.chipText,
-                selectedInterests.includes(interest) && styles.chipTextSelected,
-              ]}
-              onPress={() => handleSelectInterest(interest)}
-            >
-              {interest}
-            </Chip>
-          ))}
-        </View>
+        {country && (
+          <Text style={styles.selectedCountryText}>
+            Selected Country: {country}
+          </Text>
+        )}
 
         <TextInput
           label="Age"
@@ -149,6 +134,28 @@ const Register = () => {
           mode="outlined"
           style={styles.input}
         />
+
+        {/* Interests Selector */}
+        <Text style={styles.sectionTitle}>Select Your Interests (up to 3)</Text>
+        <View style={styles.interestsContainer}>
+          {interestsList.map((interest) => (
+            <Button
+              key={interest}
+              mode={
+                selectedInterests.includes(interest) ? "contained" : "outlined"
+              }
+              style={styles.interestButton}
+              onPress={() => handleInterestSelection(interest)}
+            >
+              {interest}
+            </Button>
+          ))}
+        </View>
+        {selectedInterests.length > 0 && (
+          <Text style={styles.selectedInterestsText}>
+            Selected Interests: {selectedInterests.join(", ")}
+          </Text>
+        )}
 
         <Button
           mode="contained"
@@ -195,29 +202,6 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: 15,
   },
-  subheading: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  chipContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 15,
-  },
-  chip: {
-    margin: 5,
-    backgroundColor: "#e0e0e0",
-  },
-  chipSelected: {
-    backgroundColor: "#6200ee",
-  },
-  chipText: {
-    color: "#000",
-  },
-  chipTextSelected: {
-    color: "#fff",
-  },
   button: {
     marginTop: 10,
     backgroundColor: "#6200ee",
@@ -234,6 +218,30 @@ const styles = StyleSheet.create({
   link: {
     color: "#6200ee",
     fontWeight: "bold",
+  },
+  sectionTitle: {
+    marginVertical: 15,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  interestsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  interestButton: {
+    marginVertical: 5,
+    marginHorizontal: 2,
+  },
+  selectedInterestsText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: "#333",
+  },
+  selectedCountryText: {
+    marginTop: 5,
+    fontSize: 14,
+    color: "#555",
   },
 });
 
