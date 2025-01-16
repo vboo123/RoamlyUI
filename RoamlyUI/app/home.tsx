@@ -56,7 +56,7 @@ export default function Home({ navigation }) {
 
           // Modify the API URL to include the user's location as query parameters
           const response = await fetch(
-            `http://192.168.1.68:8000/get-properties/?lat=${latitude}&long=${longitude}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`
+            `http://192.168.1.78:8000/get-properties/?lat=${latitude}&long=${longitude}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`
           );
 
           if (!response.ok) {

@@ -50,13 +50,15 @@ const Register = () => {
       name,
       email,
       country,
-      interests: selectedInterests,
+      interestOne: selectedInterests[0],
+      interestTwo: selectedInterests[1],
+      interestThree: selectedInterests[2],
       age,
     };
 
     try {
       const response = await axios.post(
-        "http://192.168.1.68:8000/register-user/",
+        "http://192.168.1.78:8000/register-user/",
         userData
       );
       Alert.alert(

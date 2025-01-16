@@ -61,7 +61,7 @@ export default function Login() {
     }
 
     try {
-      const url = `http://192.168.1.68:8000/login/?name=${encodeURIComponent(
+      const url = `http://192.168.1.78:8000/login/?name=${encodeURIComponent(
         name
       )}&email=${encodeURIComponent(email)}`;
 
