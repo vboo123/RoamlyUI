@@ -1,20 +1,44 @@
 import React from "react";
-import { Appbar, Menu } from "react-native-paper";
-import { StyleSheet } from "react-native";
+import { Appbar, Menu, Badge } from "react-native-paper";
+import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router"; // Import useRouter for navigation
 
 const AppBar = ({ title }) => {
   const [menuVisible, setMenuVisible] = React.useState(false);
+  const [notificationCount, setNotificationCount] = React.useState(3); // Example notification count
   const router = useRouter(); // Initialize router
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
   const closeMenu = () => setMenuVisible(false);
 
   return (
-    <Appbar.Header style={styles.header}>
-      <Appbar.BackAction onPress={router.back} color="white" />{" "}
-      {/* Back button */}
+    <Appbar.Header statusBarHeight="5" style={styles.header}>
+      {/* Back Button */}
+      <Appbar.BackAction onPress={router.back} color="white" />
+
+      {/* Title */}
       <Appbar.Content title={title} titleStyle={styles.title} />
+
+      {/* Search Icon */}
+      <Appbar.Action
+        icon="magnify"
+        color="white"
+        onPress={() => router.push("/search")} // Navigate to a search page
+      />
+
+      {/* Notifications Icon with Badge */}
+      <View>
+        <Appbar.Action
+          icon="bell"
+          color="white"
+          onPress={() => router.push("/notifications")} // Navigate to notifications page
+        />
+        {notificationCount > 0 && (
+          <Badge style={styles.badge}>{notificationCount}</Badge>
+        )}
+      </View>
+
+      {/* User Menu */}
       <Menu
         visible={menuVisible}
         onDismiss={closeMenu}
@@ -25,17 +49,56 @@ const AppBar = ({ title }) => {
             color="white"
           />
         }
-      ></Menu>
+      >
+        <Menu.Item
+          onPress={() => {
+            closeMenu();
+            router.push("/profile");
+          }}
+          title="Profile"
+        />
+        <Menu.Item
+          onPress={() => {
+            closeMenu();
+            router.push("/bookings");
+          }}
+          title="My Bookings"
+        />
+        <Menu.Item
+          onPress={() => {
+            closeMenu();
+            router.push("/settings");
+          }}
+          title="Settings"
+        />
+        <Menu.Item
+          onPress={() => {
+            closeMenu();
+            Alert.alert("Logged out");
+          }}
+          title="Logout"
+        />
+      </Menu>
     </Appbar.Header>
   );
 };
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: "#6200EE", // Use your preferred theme color
+    backgroundColor: "#6200EE", // Primary theme color
+    elevation: 4, // Shadow for elevation
   },
   title: {
     color: "white",
+    fontWeight: "bold",
+  },
+  badge: {
+    position: "absolute",
+    top: 5,
+    right: 10,
+    backgroundColor: "red",
+    color: "white",
+    fontSize: 10,
     fontWeight: "bold",
   },
 });

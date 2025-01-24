@@ -134,7 +134,7 @@ export default function Home({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <AppBar title="Home" navigation={navigation} />
+      <AppBar title="Welcome" navigation={navigation} />
       <FlatList
         data={properties}
         renderItem={renderProperty}
