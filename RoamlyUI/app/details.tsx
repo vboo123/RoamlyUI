@@ -5,12 +5,16 @@ import {
   Text as NativeText,
   TouchableWithoutFeedback,
   ScrollView,
+  Image,
 } from "react-native";
 import * as Speech from "expo-speech";
 import AppBar from "../components/AppBar";
-
+import ReactLogoPng from "../assets/images/react-logo.png";
 const textContent =
   "The Hollywood Sign, perched atop Mount Lee in the Hollywood Hills of Los Angeles, is an iconic symbol of the entertainment industry. Originally erected in 1923 as Hollywoodland to advertise a real estate development, the sign has since become synonymous with the glitz and glamour of Hollywood. Standing 45 feet tall and stretching 350 feet wide, it offers sweeping views of the city and serves as a cultural landmark, drawing visitors from around the world. Over the decades, the sign has been restored and preserved, cementing its status as a beacon of ambition and creativity.";
+
+const imageUri =
+  "https://upload.wikimedia.org/wikipedia/commons/5/5e/Hollywood_Sign_%28Zuschnitt%29.jpg"; // Example Hollywood Sign image URL
 
 export default function Details({ navigation }) {
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -29,6 +33,7 @@ export default function Details({ navigation }) {
     });
   }, []);
 
+  // Automatic highlighting of words
   useEffect(() => {
     const interval = setInterval(() => {
       setHighlightedIndex((prevIndex) =>
@@ -39,6 +44,7 @@ export default function Details({ navigation }) {
     return () => clearInterval(interval);
   }, [words]);
 
+  // Text-to-speech on start and stop
   useEffect(() => {
     Speech.speak(textContent, {
       onStart: () => setHighlightedIndex(0),
@@ -51,6 +57,7 @@ export default function Details({ navigation }) {
     return () => Speech.stop();
   }, [textContent, selectedVoice]);
 
+  // Scroll to highlighted word
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({
@@ -60,6 +67,7 @@ export default function Details({ navigation }) {
     }
   }, [highlightedIndex]);
 
+  // Handle word press for manual control
   const handleWordPress = (index) => {
     setHighlightedIndex(index);
     Speech.stop();
@@ -73,12 +81,16 @@ export default function Details({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <AppBar title="Details" navigation={navigation} />
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={styles.scrollViewContent}
       >
-        <AppBar title="Details" navigation={navigation} />
-        <View style={styles.wordsContainer}>
+        {/* Image Section */}
+        <Image source={ReactLogoPng} style={styles.image} />
+
+        {/* Text Section */}
+        <View style={styles.textContainer}>
           {words.map((word, index) => (
             <TouchableWithoutFeedback
               key={index}
@@ -106,16 +118,29 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f9", // Light background
   },
   scrollViewContent: {
-    paddingVertical: 20,
+    padding: 20,
   },
-  wordsContainer: {
+  image: {
+    width: "100%",
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  textContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 10,
+    elevation: 3, // Shadow for Android
+    shadowColor: "#000", // Shadow for iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   word: {
-    fontSize: 20,
-    marginHorizontal: 8,
+    fontSize: 18,
+    marginHorizontal: 4,
     marginVertical: 6,
     color: "#333",
     textAlign: "center",
@@ -126,8 +151,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     borderRadius: 5,
     paddingHorizontal: 4,
-    textShadowColor: "rgba(0, 0, 0, 0.25)", // Add shadow effect
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
 });
