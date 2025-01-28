@@ -5,11 +5,13 @@ import {
   View,
   ActivityIndicator,
   Alert,
+  Image,
 } from "react-native";
 import { Card, Text, Button } from "react-native-paper";
 import AppBar from "../components/AppBar";
 import * as Location from "expo-location"; // Import location module
 import { useRouter } from "expo-router"; // Import the router
+import GrifithObsv from "../assets/images/grifith-obsv.jpeg";
 
 export default function Home({ navigation }) {
   const router = useRouter(); // Initialize router
@@ -89,13 +91,8 @@ export default function Home({ navigation }) {
         <Text variant="titleLarge" style={styles.title}>
           {item.landmarkName}
         </Text>
-        <Text variant="bodyMedium" style={styles.description}>
-          {item.city}, {item.country}
-        </Text>
-        <Text variant="bodyLarge" style={styles.geohash}>
-          Geohash: {item.geohash_code}
-        </Text>
       </Card.Content>
+      <Card.Cover source={GrifithObsv} />
       <Card.Actions>
         <Button
           mode="contained"
@@ -176,5 +173,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  image: {
+    height: 100,
   },
 });
