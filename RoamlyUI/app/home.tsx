@@ -69,6 +69,7 @@ export default function Home({ navigation }) {
 
           // Extract properties from the response
           if (data && data.properties) {
+            console.log(data.properties);
             setProperties(data.properties);
           } else {
             throw new Error("Invalid response format.");
@@ -100,12 +101,27 @@ export default function Home({ navigation }) {
             router.push({
               pathname: "/details",
               params: {
-                item: JSON.stringify(item), // Serialize the object
+                itemLatitude: item.latitude,
+                itemLongitude: item.longitude,
               },
             })
           }
         >
           View Details
+        </Button>
+        <Button
+          mode="contained"
+          onPress={() =>
+            router.push({
+              pathname: "/mapScreen",
+              params: {
+                itemLatitude: item.latitude,
+                itemLongitude: item.longitude,
+              },
+            })
+          }
+        >
+          View Map
         </Button>
       </Card.Actions>
     </Card>
