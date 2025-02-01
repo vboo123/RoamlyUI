@@ -1,18 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import {
+  View,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from "react-native";
+import MapView, { Callout, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { Text, Button } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { usePropertyStore } from "@/stores/Property_Store";
 
 export default function MapScreen() {
-  console.log("enter mapScreen component");
   const properties = usePropertyStore((state) => state.properties);
-  const { itemLatitude, itemLongitude } = useLocalSearchParams<{
+  console.log(properties);
+  const { itemLatitude, itemLongitude, landmarkName } = useLocalSearchParams<{
     itemLatitude: string;
     itemLongitude: string;
+    landmarkName: string;
   }>();
   console.log(itemLatitude);
   console.log(itemLongitude);
@@ -80,18 +87,6 @@ export default function MapScreen() {
           />
 
           {/* If params are provided, display the single property marker */}
-          {itemLatitude && itemLongitude && (
-            <Marker
-              coordinate={{
-                latitude: Number(itemLatitude),
-                longitude: Number(itemLongitude),
-              }}
-              title="Selected Property"
-              description="This is your selected property."
-            />
-          )}
-
-          {/* If no params, display all property markers */}
           {!itemLatitude &&
             !itemLongitude &&
             properties.map((property, index) => (
@@ -101,9 +96,18 @@ export default function MapScreen() {
                   latitude: property.latitude,
                   longitude: property.longitude,
                 }}
-                title={property.name}
-                description={property.description}
-              />
+              >
+                <Callout onPress={() => router.push("/home")}>
+                  <TouchableWithoutFeedback>
+                    <View style={{ padding: 10, width: 150 }}>
+                      <Text style={{ fontWeight: "bold" }}>
+                        {property.landmarkName}
+                      </Text>
+                      <Text>Click Here to View Details</Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </Callout>
+              </Marker>
             ))}
         </MapView>
       ) : (

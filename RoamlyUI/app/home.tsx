@@ -122,6 +122,7 @@ export default function Home({ navigation }) {
               params: {
                 itemLatitude: item.latitude,
                 itemLongitude: item.longitude,
+                landmarkName: item.landmarkName,
               },
             })
           }
