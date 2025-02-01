@@ -4,6 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router"; // Import useRouter for navigation
 
 const AppBar = ({ title }) => {
+  console.log("App bar is rendered");
   const [menuVisible, setMenuVisible] = React.useState(false);
   const [notificationCount, setNotificationCount] = React.useState(3); // Example notification count
   const router = useRouter(); // Initialize router
@@ -29,13 +30,10 @@ const AppBar = ({ title }) => {
       {/* Notifications Icon with Badge */}
       <View>
         <Appbar.Action
-          icon="bell"
+          icon="map"
           color="white"
-          onPress={() => router.push("/notifications")} // Navigate to notifications page
+          onPress={() => router.push("/mapScreen")} // Navigate to notifications page
         />
-        {notificationCount > 0 && (
-          <Badge style={styles.badge}>{notificationCount}</Badge>
-        )}
       </View>
 
       {/* User Menu */}

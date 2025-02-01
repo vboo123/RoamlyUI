@@ -12,13 +12,16 @@ import AppBar from "../components/AppBar";
 import * as Location from "expo-location"; // Import location module
 import { useRouter } from "expo-router"; // Import the router
 import GrifithObsv from "../assets/images/grifith-obsv.jpeg";
+import { usePropertyStore } from "@/stores/Property_Store";
 
 export default function Home({ navigation }) {
+  console.log("Home page is rendered");
   const router = useRouter(); // Initialize router
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userLocation, setUserLocation] = useState(null); // State to store the user's location
+  const addProperty = usePropertyStore((state) => state.addProperty);
 
   // Fetch the user's location
   useEffect(() => {
