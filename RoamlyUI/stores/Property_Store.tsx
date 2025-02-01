@@ -1,8 +1,10 @@
 import { create } from "zustand";
-import { propertiesSchema } from "@/schemas/propety-data";
-import { propertySchema } from "@/schemas/propety-data";
+import { propertiesSchema, propertySchema } from "@/schemas/property-data";
 
-// Zustand Store with Schema Validation
+// ToDo: Need to enforce zustand store validation for the schemas
+// once we finalize the property values and information
+
+// Zustand Store
 export const usePropertyStore = create((set) => ({
   property: "Default Property",
   properties: [],
@@ -10,12 +12,9 @@ export const usePropertyStore = create((set) => ({
   setProperty: (property) => set({ property }),
 
   addProperty: (newProperty) =>
-    set((state) => {
-      const parsed = propertySchema.safeParse(newProperty);
-      return parsed.success
-        ? { properties: [...state.properties, parsed.data] }
-        : state;
-    }),
+    set((state) => ({
+      properties: [...state.properties, newProperty],
+    })),
 
   removeProperty: (id) =>
     set((state) => ({

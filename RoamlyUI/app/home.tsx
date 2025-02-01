@@ -15,12 +15,11 @@ import GrifithObsv from "../assets/images/grifith-obsv.jpeg";
 import { usePropertyStore } from "@/stores/Property_Store";
 
 export default function Home({ navigation }) {
-  console.log("Home page is rendered");
-  const router = useRouter(); // Initialize router
-  const [properties, setProperties] = useState([]);
+  const router = useRouter();
+  const properties = usePropertyStore((state) => state.properties);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userLocation, setUserLocation] = useState(null); // State to store the user's location
+  const [userLocation, setUserLocation] = useState(null);
   const addProperty = usePropertyStore((state) => state.addProperty);
 
   // Fetch the user's location
@@ -72,8 +71,11 @@ export default function Home({ navigation }) {
 
           // Extract properties from the response
           if (data && data.properties) {
-            console.log(data.properties);
-            setProperties(data.properties);
+            const propertiesArray = Object.values(data.properties);
+            propertiesArray.forEach((item) => {
+              console.log(item);
+              addProperty(item);
+            });
           } else {
             throw new Error("Invalid response format.");
           }
