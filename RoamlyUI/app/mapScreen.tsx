@@ -15,14 +15,11 @@ import { usePropertyStore } from "@/stores/Property_Store";
 
 export default function MapScreen() {
   const properties = usePropertyStore((state) => state.properties);
-  console.log(properties);
   const { itemLatitude, itemLongitude, landmarkName } = useLocalSearchParams<{
     itemLatitude: string;
     itemLongitude: string;
     landmarkName: string;
   }>();
-  console.log(itemLatitude);
-  console.log(itemLongitude);
 
   const [userLocation, setUserLocation] = useState(null);
   const [region, setRegion] = useState(null); // State for initial region

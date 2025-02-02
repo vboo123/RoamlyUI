@@ -11,11 +11,18 @@ import { Button, TextInput, Headline, Divider } from "react-native-paper";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
+import * as Location from "expo-location"; // Import location module
+import { usePropertyStore } from "@/stores/Property_Store";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const userLat = usePropertyStore((state) => state.userLat);
+  const userLong = usePropertyStore((state) => state.userLong);
+  const properties = usePropertyStore((state) => state.properties);
+  const addProperty = usePropertyStore((state) => state.addProperty);
 
   // State for user inputs
   const [name, setName] = useState("");
@@ -35,6 +42,59 @@ export default function Login() {
       fetchUserInfo(authentication.accessToken);
     }
   }, [response]);
+
+  const getUserLocation = async () => {
+    console.log("entered function");
+    try {
+      // Request location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Denied",
+          "Location permission is required to fetch properties near you."
+        );
+        return;
+      }
+
+      // Get the current location of the user
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      console.log("User location 1: ", latitude, longitude);
+
+      // Set the user location in the store
+      usePropertyStore.setState({ userLat: latitude, userLong: longitude });
+    } catch (err) {
+      Alert.alert("Error", "Failed to get user location.");
+    }
+  };
+
+  const fetchProperties = async () => {
+    console.log("inside fetchProperties function");
+    console.log(userLat);
+    try {
+      const response = await fetch(
+        `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch properties.");
+      }
+      const data = await response.json();
+
+      // Extract properties from the response
+      if (data && data.properties) {
+        const propertiesArray = Object.values(data.properties);
+        propertiesArray.forEach((item) => {
+          addProperty(item);
+        });
+      } else {
+        throw new Error("Invalid response format.");
+      }
+    } catch (err) {
+      Alert.alert("Error", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchUserInfo = async (accessToken) => {
     try {
@@ -75,7 +135,10 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        router.push("/home");
+        // do all API calls and populate the store here
+        await getUserLocation();
+        await fetchProperties();
+        if (!loading) await router.push("/home");
       } else {
         Alert.alert("Login Failed", data.detail);
       }

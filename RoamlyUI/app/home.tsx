@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { Card, Text, Button } from "react-native-paper";
 import AppBar from "../components/AppBar";
-import * as Location from "expo-location"; // Import location module
 import { useRouter } from "expo-router"; // Import the router
 import GrifithObsv from "../assets/images/grifith-obsv.jpeg";
 import { usePropertyStore } from "@/stores/Property_Store";
@@ -19,77 +18,8 @@ export default function Home({ navigation }) {
   const properties = usePropertyStore((state) => state.properties);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
-  const addProperty = usePropertyStore((state) => state.addProperty);
-
-  // Fetch the user's location
-  useEffect(() => {
-    const getUserLocation = async () => {
-      try {
-        // Request location permissions
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert(
-            "Permission Denied",
-            "Location permission is required to fetch properties near you."
-          );
-          return;
-        }
-
-        // Get the current location of the user
-        const location = await Location.getCurrentPositionAsync({});
-        setUserLocation(location.coords); // Store the user's location
-      } catch (err) {
-        setError("Failed to get user location.");
-        Alert.alert("Error", "Failed to get user location.");
-      }
-    };
-
-    getUserLocation();
-  }, []);
-
-  // Fetch properties only after getting the user's location
-  useEffect(() => {
-    if (userLocation) {
-      console.log(userLocation);
-      const fetchProperties = async () => {
-        try {
-          const { latitude, longitude } = userLocation;
-          console.log(latitude);
-          console.log(longitude);
-
-          // Modify the API URL to include the user's location as query parameters
-          const response = await fetch(
-            `http://192.168.1.78:8000/get-properties/?lat=${latitude}&long=${longitude}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch properties.");
-          }
-
-          const data = await response.json();
-
-          // Extract properties from the response
-          if (data && data.properties) {
-            const propertiesArray = Object.values(data.properties);
-            propertiesArray.forEach((item) => {
-              console.log(item);
-              addProperty(item);
-            });
-          } else {
-            throw new Error("Invalid response format.");
-          }
-        } catch (err) {
-          setError(err.message);
-          Alert.alert("Error", err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchProperties();
-    }
-  }, [userLocation]); // Only trigger the fetch after the user's location is available
+  const userLat = usePropertyStore((state) => state.userLat);
+  const userLong = usePropertyStore((state) => state.userLong);
 
   const renderProperty = ({ item }) => (
     <Card style={styles.card} mode="elevated">
@@ -132,14 +62,6 @@ export default function Home({ navigation }) {
       </Card.Actions>
     </Card>
   );
-
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007BFF" />
-      </View>
-    );
-  }
 
   if (error) {
     return (

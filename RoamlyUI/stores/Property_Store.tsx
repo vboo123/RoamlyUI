@@ -8,6 +8,8 @@ import { propertiesSchema, propertySchema } from "@/schemas/property-data";
 export const usePropertyStore = create((set) => ({
   property: "Default Property",
   properties: [],
+  userLat: null,
+  userLong: null,
 
   setProperty: (property) => set({ property }),
 
