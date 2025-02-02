@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  FlatList,
-  StyleSheet,
-  View,
-  ActivityIndicator,
-  Alert,
-  Image,
-} from "react-native";
+import { FlatList, StyleSheet, View, Alert } from "react-native";
 import { Card, Text, Button } from "react-native-paper";
 import AppBar from "../components/AppBar";
 import { useRouter } from "expo-router"; // Import the router
@@ -16,10 +9,7 @@ import { usePropertyStore } from "@/stores/Property_Store";
 export default function Home({ navigation }) {
   const router = useRouter();
   const properties = usePropertyStore((state) => state.properties);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const userLat = usePropertyStore((state) => state.userLat);
-  const userLong = usePropertyStore((state) => state.userLong);
 
   const renderProperty = ({ item }) => (
     <Card style={styles.card} mode="elevated">
@@ -35,10 +25,6 @@ export default function Home({ navigation }) {
           onPress={() =>
             router.push({
               pathname: "/details",
-              params: {
-                itemLatitude: item.latitude,
-                itemLongitude: item.longitude,
-              },
             })
           }
         >
