@@ -21,7 +21,7 @@ export default function Home({ navigation }) {
       <Card.Cover source={GrifithObsv} />
       <Card.Actions>
         <Button
-          mode="contained" 
+          mode="contained"
           onPress={() =>
             router.push({
               pathname: "/details",
@@ -61,7 +61,7 @@ export default function Home({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <AppBar title="Welcome" navigation={navigation} />
+      <AppBar title="Home" navigation={navigation} />
       <FlatList
         data={properties}
         renderItem={renderProperty}

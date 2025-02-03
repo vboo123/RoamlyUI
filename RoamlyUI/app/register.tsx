@@ -46,13 +46,21 @@ const Register = () => {
   };
 
   const handleRegister = async () => {
+    // Sort the selected interests alphabetically
+    const sortedInterests = [...selectedInterests].sort();
+
+    // Ensure that we have at least 3 interests, otherwise pad the array with empty strings
+    while (sortedInterests.length < 3) {
+      sortedInterests.push(""); // Add empty string for any missing interests
+    }
+
     const userData = {
       name,
       email,
       country,
-      interestOne: selectedInterests[0],
-      interestTwo: selectedInterests[1],
-      interestThree: selectedInterests[2],
+      interestOne: sortedInterests[0],
+      interestTwo: sortedInterests[1],
+      interestThree: sortedInterests[2],
       age,
     };
 
