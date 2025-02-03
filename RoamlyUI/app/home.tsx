@@ -21,7 +21,7 @@ export default function Home({ navigation }) {
       <Card.Cover source={GrifithObsv} />
       <Card.Actions>
         <Button
-          mode="contained"
+          mode="contained" 
           onPress={() =>
             router.push({
               pathname: "/details",

@@ -21,7 +21,6 @@ export default function Login() {
   const [loading, setLoading] = useState(true);
   const userLat = usePropertyStore((state) => state.userLat);
   const userLong = usePropertyStore((state) => state.userLong);
-  const properties = usePropertyStore((state) => state.properties);
   const addProperty = usePropertyStore((state) => state.addProperty);
 
   // State for user inputs
@@ -106,7 +105,7 @@ export default function Login() {
       );
       const user = await userInfoResponse.json();
       Alert.alert("Login Successful", `Welcome, ${user.name}`);
-      router.push("/home");
+      router.navigate("/home");
     } catch (error) {
       console.error("Error fetching user info:", error);
       Alert.alert("Error", "Could not retrieve user information.");
@@ -140,7 +139,7 @@ export default function Login() {
         await fetchProperties();
         if (!loading) await router.push("/home");
       } else {
-        Alert.alert("Login Failed", data.detail);
+        Alert.alert("", data.detail);
       }
     } catch (error) {
       console.error(error);

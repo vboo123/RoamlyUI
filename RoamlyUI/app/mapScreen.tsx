@@ -50,7 +50,7 @@ export default function MapScreen() {
                   longitude: property.longitude,
                 }}
               >
-                <Callout onPress={() => router.push("/home")}>
+                <Callout onPress={() => router.navigate("/home")}>
                   <TouchableWithoutFeedback>
                     <View style={{ padding: 10, width: 150 }}>
                       <Text style={{ fontWeight: "bold" }}>

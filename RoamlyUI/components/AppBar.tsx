@@ -1,22 +1,37 @@
 import React from "react";
-import { Appbar, Menu, Badge } from "react-native-paper";
-import { StyleSheet, View } from "react-native";
+import { Appbar, Menu } from "react-native-paper";
+import { StyleSheet, View, Alert } from "react-native";
 import { useRouter } from "expo-router"; // Import useRouter for navigation
+import { usePropertyStore } from "@/stores/Property_Store";
 
 const AppBar = ({ title }) => {
   console.log("App bar is rendered");
   const [menuVisible, setMenuVisible] = React.useState(false);
-  const [notificationCount, setNotificationCount] = React.useState(3); // Example notification count
   const router = useRouter(); // Initialize router
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
   const closeMenu = () => setMenuVisible(false);
 
+  const handleLogout = async () => {
+    try {
+      // Clear all session data from PropertyStore
+      usePropertyStore.setState({
+        userLat: null,
+        userLong: null,
+        properties: [],
+      });
+      console.log("User logged out");
+
+      // Redirect to login page
+      router.navigate("/login"); // Navigate to login page
+    } catch (error) {
+      console.error("Error during logout", error);
+      Alert.alert("Error", "An error occurred while logging out");
+    }
+  };
+
   return (
     <Appbar.Header statusBarHeight="5" style={styles.header}>
-      {/* Back Button */}
-      <Appbar.BackAction onPress={router.back} color="white" />
-
       {/* Title */}
       <Appbar.Content title={title} titleStyle={styles.title} />
 
@@ -32,51 +47,17 @@ const AppBar = ({ title }) => {
         <Appbar.Action
           icon="map"
           color="white"
-          onPress={() => router.push("/mapScreen")} // Navigate to notifications page
+          onPress={() => router.push("/mapScreen")} // Navigate to map page
         />
       </View>
 
-      {/* User Menu */}
-      <Menu
-        visible={menuVisible}
-        onDismiss={closeMenu}
-        anchor={
-          <Appbar.Action
-            icon="account-circle"
-            onPress={toggleMenu}
-            color="white"
-          />
-        }
-      >
-        <Menu.Item
-          onPress={() => {
-            closeMenu();
-            router.push("/profile");
-          }}
-          title="Profile"
+      <View>
+        <Appbar.Action
+          icon="logout"
+          color="white"
+          onPress={() => handleLogout()} // Navigate to map page
         />
-        <Menu.Item
-          onPress={() => {
-            closeMenu();
-            router.push("/bookings");
-          }}
-          title="My Bookings"
-        />
-        <Menu.Item
-          onPress={() => {
-            closeMenu();
-            router.push("/settings");
-          }}
-          title="Settings"
-        />
-        <Menu.Item
-          onPress={() => {
-            closeMenu();
-            Alert.alert("Logged out");
-          }}
-          title="Logout"
-        />
-      </Menu>
+      </View>
     </Appbar.Header>
   );
 };
@@ -88,15 +69,6 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "white",
-    fontWeight: "bold",
-  },
-  badge: {
-    position: "absolute",
-    top: 5,
-    right: 10,
-    backgroundColor: "red",
-    color: "white",
-    fontSize: 10,
     fontWeight: "bold",
   },
 });
