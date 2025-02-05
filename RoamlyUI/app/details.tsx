@@ -7,9 +7,11 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import * as Speech from "expo-speech";
 import AppBar from "../components/AppBar";
 import ReactLogoPng from "../assets/images/react-logo.png";
+import { usePropertyStore } from "@/stores/Property_Store";
+import { useUserStore } from "@/stores/user_store";
+import { useLocalSearchParams } from "expo-router";
 const textContent =
   "The Hollywood Sign, perched atop Mount Lee in the Hollywood Hills of Los Angeles, is an iconic symbol of the entertainment industry. Originally erected in 1923 as Hollywoodland to advertise a real estate development, the sign has since become synonymous with the glitz and glamour of Hollywood. Standing 45 feet tall and stretching 350 feet wide, it offers sweeping views of the city and serves as a cultural landmark, drawing visitors from around the world. Over the decades, the sign has been restored and preserved, cementing its status as a beacon of ambition and creativity.";
 
@@ -18,66 +20,48 @@ const imageUri =
 
 export default function Details({ navigation }) {
   const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const [selectedVoice, setSelectedVoice] = useState(null);
+  const { landmarkName } = useLocalSearchParams<{
+    landmarkName: string;
+  }>();
+  console.log(landmarkName);
+  const property = usePropertyStore((state) => state.properties[landmarkName]);
+  const userInfo = useUserStore((state) => state.userInfo);
+  console.log(property);
   const words = textContent.split(" ");
   const scrollRef = useRef(null);
 
-  // Fetch available voices and select a pleasant one
   useEffect(() => {
-    Speech.getAvailableVoicesAsync().then((voices) => {
-      const pleasantVoice = voices.find(
-        (voice) =>
-          voice.language.startsWith("en") && voice.quality === "Enhanced"
+    if (property && property.responses) {
+      // Convert responses into a Record<string, any>
+      const responsesRecord = Object.entries(property.responses).reduce(
+        (acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        },
+        {}
       );
-      setSelectedVoice(pleasantVoice?.identifier || null);
-    });
-  }, []);
+      const trimmedLandmarkName = landmarkName.replace(" ", "");
+      const trimmedCountryName = userInfo.country.replace(" ", "");
 
-  // Automatic highlighting of words
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setHighlightedIndex((prevIndex) =>
-        prevIndex < words.length - 1 ? prevIndex + 1 : prevIndex
-      );
-    }, 500);
+      let ageRange = "";
 
-    return () => clearInterval(interval);
-  }, [words]);
-
-  // Text-to-speech on start and stop
-  useEffect(() => {
-    Speech.speak(textContent, {
-      onStart: () => setHighlightedIndex(0),
-      onDone: () => setHighlightedIndex(-1),
-      pitch: 1.2,
-      rate: 0.9,
-      voice: selectedVoice,
-    });
-
-    return () => Speech.stop();
-  }, [textContent, selectedVoice]);
-
-  // Scroll to highlighted word
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        y: Math.floor(highlightedIndex / 3) * 50, // Scroll by rows
-        animated: true,
-      });
+      if (Number(userInfo.age) < 25) {
+        ageRange = "young";
+      } else if (Number(userInfo.age) > 25 && Number(userInfo.age) < 60) {
+        ageRange = "medium";
+      } else {
+        ageRange = "old";
+      }
+      const constructedKey = `${trimmedLandmarkName}_${userInfo.interestOne}_${userInfo.interestTwo}_${userInfo.interestThree}_${trimmedCountryName}_${userInfo.language}_${ageRange}_small`;
+      console.log(constructedKey);
+      // Open JSON file with the same name as the constructedKey from property.response
+      console.log("responsesRecord is \n");
+      console.log(responsesRecord);
+      const response = responsesRecord[constructedKey];
+      console.log("printing out selected response");
+      console.log(response);
     }
-  }, [highlightedIndex]);
-
-  // Handle word press for manual control
-  const handleWordPress = (index) => {
-    setHighlightedIndex(index);
-    Speech.stop();
-    const newText = words.slice(index).join(" ");
-    Speech.speak(newText, {
-      pitch: 1.2,
-      rate: 0.9,
-      voice: selectedVoice,
-    });
-  };
+  }, [property]);
 
   return (
     <View style={styles.container}>

@@ -9,6 +9,7 @@ import { usePropertyStore } from "@/stores/Property_Store";
 export default function Home({ navigation }) {
   const router = useRouter();
   const properties = usePropertyStore((state) => state.properties);
+  console.log(JSON.stringify(properties[0]));
   const [error, setError] = useState(null);
 
   const renderProperty = ({ item }) => (
@@ -25,6 +26,9 @@ export default function Home({ navigation }) {
           onPress={() =>
             router.push({
               pathname: "/details",
+              params: {
+                landmarkName: item.landmarkName,
+              },
             })
           }
         >
@@ -63,9 +67,9 @@ export default function Home({ navigation }) {
     <View style={styles.container}>
       <AppBar title="Home" navigation={navigation} />
       <FlatList
-        data={properties}
+        data={Object.values(properties)}
         renderItem={renderProperty}
-        keyExtractor={(item) => item.property_id} // Use the unique property_id as the key
+        keyExtractor={(item) => item.landmarkName} // Use the unique property_id as the key
         contentContainerStyle={styles.listContent}
       />
     </View>

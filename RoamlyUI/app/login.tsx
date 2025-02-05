@@ -13,6 +13,7 @@ import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import * as Location from "expo-location"; // Import location module
 import { usePropertyStore } from "@/stores/Property_Store";
+import { useUserStore } from "@/stores/user_store";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -22,6 +23,7 @@ export default function Login() {
   const userLat = usePropertyStore((state) => state.userLat);
   const userLong = usePropertyStore((state) => state.userLong);
   const addProperty = usePropertyStore((state) => state.addProperty);
+  const userInfo = useUserStore((state) => state.userInfo);
 
   // State for user inputs
   const [name, setName] = useState("");
@@ -70,10 +72,20 @@ export default function Login() {
   const fetchProperties = async () => {
     console.log("inside fetchProperties function");
     console.log(userLat);
+
+    let apiURI = "";
+    if (userInfo) {
+      // ToDO: need to handle cases if less than 2 interests provided
+      // need better handling because the defualt is '' -> need better error handling / checking here
+      apiURI = `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=${userInfo.interestOne}&interestTwo=${userInfo.interestTwo}&interestThree=${userInfo.interestThree}&userAge=${userInfo.age}21&userCountry=${userInfo.country}a&userLanguage=${userInfo.language}`;
+    } else {
+      // default route if userInfo is not valid
+      // ToDO: figure out what to do here
+      apiURI = `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`;
+    }
+
     try {
-      const response = await fetch(
-        `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`
-      );
+      const response = await fetch(apiURI);
       if (!response.ok) {
         throw new Error("Failed to fetch properties.");
       }
@@ -83,7 +95,7 @@ export default function Login() {
       if (data && data.properties) {
         const propertiesArray = Object.values(data.properties);
         propertiesArray.forEach((item) => {
-          addProperty(item);
+          addProperty(item.landmarkName, item);
         });
       } else {
         throw new Error("Invalid response format.");
@@ -132,6 +144,23 @@ export default function Login() {
       });
 
       const data = await response.json();
+      console.log(data);
+
+      if (data) {
+        useUserStore.setState({
+          userInfo: {
+            user_id: data[0],
+            name: data[1],
+            interestOne: data[2],
+            interestTwo: data[3],
+            interestThree: data[4],
+            age: data[5],
+            country: data[6],
+            language: data[7],
+          },
+        });
+        console.log(userInfo);
+      }
 
       if (response.ok) {
         // do all API calls and populate the store here

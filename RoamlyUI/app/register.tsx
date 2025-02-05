@@ -34,6 +34,7 @@ const Register = () => {
   const [age, setAge] = useState("");
   const [countryCode, setCountryCode] = useState("US"); // Default country
   const [selectedInterests, setSelectedInterests] = useState([]);
+  const [language, setLanguage] = useState("English"); // Default language
 
   const handleInterestSelection = (interest) => {
     if (selectedInterests.includes(interest)) {
@@ -62,6 +63,7 @@ const Register = () => {
       interestTwo: sortedInterests[1],
       interestThree: sortedInterests[2],
       age,
+      language, // Include language in user data
     };
 
     try {
@@ -89,6 +91,7 @@ const Register = () => {
     setCountry(null);
     setAge("");
     setSelectedInterests([]);
+    setLanguage("English"); // Reset language to default
   };
 
   return (
@@ -143,6 +146,16 @@ const Register = () => {
           onChangeText={setAge}
           mode="outlined"
           style={styles.input}
+        />
+
+        {/* Language Selector */}
+        <TextInput
+          label="Preferred Language"
+          value={language}
+          onChangeText={setLanguage}
+          mode="outlined"
+          style={styles.input}
+          placeholder="Enter your preferred language"
         />
 
         {/* Interests Selector */}

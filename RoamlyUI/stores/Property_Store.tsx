@@ -1,25 +1,25 @@
 import { create } from "zustand";
-import { propertiesSchema, propertySchema } from "@/schemas/property-data";
-
-// ToDo: Need to enforce zustand store validation for the schemas
-// once we finalize the property values and information
 
 // Zustand Store
 export const usePropertyStore = create((set) => ({
   property: "Default Property",
-  properties: [],
+  // Define properties as a Record with string keys and propertySchema as values
+  properties: {},
   userLat: null,
   userLong: null,
 
   setProperty: (property) => set({ property }),
 
-  addProperty: (newProperty) =>
+  // Add a property by using an object key-value pair
+  addProperty: (id, newProperty) =>
     set((state) => ({
-      properties: [...state.properties, newProperty],
+      properties: { ...state.properties, [id]: newProperty },
     })),
 
   removeProperty: (id) =>
-    set((state) => ({
-      properties: state.properties.filter((prop) => prop.id !== id),
-    })),
+    set((state) => {
+      const newProperties = { ...state.properties };
+      delete newProperties[id];
+      return { properties: newProperties };
+    }),
 }));
