@@ -45,7 +45,6 @@ export default function Login() {
   }, [response]);
 
   const getUserLocation = async () => {
-    console.log("entered function");
     try {
       // Request location permissions
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -60,7 +59,6 @@ export default function Login() {
       // Get the current location of the user
       const location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;
-      console.log("User location 1: ", latitude, longitude);
 
       // Set the user location in the store
       usePropertyStore.setState({ userLat: latitude, userLong: longitude });
@@ -70,14 +68,11 @@ export default function Login() {
   };
 
   const fetchProperties = async () => {
-    console.log("inside fetchProperties function");
-    console.log(userLat);
-
     let apiURI = "";
     if (userInfo) {
       // ToDO: need to handle cases if less than 2 interests provided
       // need better handling because the defualt is '' -> need better error handling / checking here
-      apiURI = `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=${userInfo.interestOne}&interestTwo=${userInfo.interestTwo}&interestThree=${userInfo.interestThree}&userAge=${userInfo.age}21&userCountry=${userInfo.country}a&userLanguage=${userInfo.language}`;
+      apiURI = `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=${userInfo.interestOne}&interestTwo=${userInfo.interestTwo}&interestThree=${userInfo.interestThree}&userAge=${userInfo.age}&userCountry=${userInfo.country}&userLanguage=${userInfo.language}`;
     } else {
       // default route if userInfo is not valid
       // ToDO: figure out what to do here
@@ -144,22 +139,35 @@ export default function Login() {
       });
 
       const data = await response.json();
-      console.log(data);
 
       if (data) {
-        useUserStore.setState({
-          userInfo: {
-            user_id: data[0],
-            name: data[1],
-            interestOne: data[2],
-            interestTwo: data[3],
-            interestThree: data[4],
-            age: data[5],
-            country: data[6],
-            language: data[7],
-          },
-        });
-        console.log(userInfo);
+        if (data[6] == "United States") {
+          useUserStore.setState({
+            userInfo: {
+              user_id: data[0],
+              name: data[1],
+              interestOne: data[2],
+              interestTwo: data[3],
+              interestThree: data[4],
+              age: data[5],
+              country: "UnitedStatesofAmerica",
+              language: data[7],
+            },
+          });
+        } else {
+          useUserStore.setState({
+            userInfo: {
+              user_id: data[0],
+              name: data[1],
+              interestOne: data[2],
+              interestTwo: data[3],
+              interestThree: data[4],
+              age: data[5],
+              country: data[6],
+              language: data[7],
+            },
+          });
+        }
       }
 
       if (response.ok) {
