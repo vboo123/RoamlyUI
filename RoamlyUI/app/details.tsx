@@ -12,8 +12,6 @@ import ReactLogoPng from "../assets/images/react-logo.png";
 import { usePropertyStore } from "@/stores/Property_Store";
 import { useUserStore } from "@/stores/user_store";
 import { useLocalSearchParams } from "expo-router";
-const textContent =
-  "The Hollywood Sign, perched atop Mount Lee in the Hollywood Hills of Los Angeles, is an iconic symbol of the entertainment industry. Originally erected in 1923 as Hollywoodland to advertise a real estate development, the sign has since become synonymous with the glitz and glamour of Hollywood. Standing 45 feet tall and stretching 350 feet wide, it offers sweeping views of the city and serves as a cultural landmark, drawing visitors from around the world. Over the decades, the sign has been restored and preserved, cementing its status as a beacon of ambition and creativity.";
 
 const imageUri =
   "https://upload.wikimedia.org/wikipedia/commons/5/5e/Hollywood_Sign_%28Zuschnitt%29.jpg"; // Example Hollywood Sign image URL
@@ -26,9 +24,9 @@ export default function Details({ navigation }) {
   console.log(landmarkName);
   const property = usePropertyStore((state) => state.properties[landmarkName]);
   const userInfo = useUserStore((state) => state.userInfo);
-  console.log(property);
-  const words = textContent.split(" ");
   const scrollRef = useRef(null);
+  const [textContent, setTextContent] = useState("");
+  const words = textContent.split(" ");
 
   useEffect(() => {
     if (property && property.responses) {
@@ -53,15 +51,23 @@ export default function Details({ navigation }) {
         ageRange = "old";
       }
       const constructedKey = `${trimmedLandmarkName}_${userInfo.interestOne}_${userInfo.interestTwo}_${userInfo.interestThree}_${trimmedCountryName}_${userInfo.language}_${ageRange}_small`;
-      console.log(constructedKey);
       // Open JSON file with the same name as the constructedKey from property.response
-      console.log("responsesRecord is \n");
-      console.log(responsesRecord);
       const response = responsesRecord[constructedKey];
-      console.log("printing out selected response");
-      console.log(response);
+
+      if (response && response != null) {
+        // display to user
+        setTextContent(response);
+      } else {
+        // display error getting responses
+        setTextContent("Error getting responses");
+      }
     }
   }, [property]);
+
+  // Handle word press event to highlight the clicked word
+  const handleWordPress = (index: number) => {
+    setHighlightedIndex(index);
+  };
 
   return (
     <View style={styles.container}>
@@ -78,12 +84,12 @@ export default function Details({ navigation }) {
           {words.map((word, index) => (
             <TouchableWithoutFeedback
               key={index}
-              onPress={() => handleWordPress(index)}
+              onPress={() => handleWordPress(index)} // Handle word click
             >
               <NativeText
                 style={[
                   styles.word,
-                  index === highlightedIndex && styles.highlightedWord,
+                  index === highlightedIndex && styles.highlightedWord, // Highlight clicked word
                 ]}
               >
                 {word + " "}
