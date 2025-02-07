@@ -1,16 +1,13 @@
 import React from "react";
-import { Appbar, Menu } from "react-native-paper";
+import { Appbar } from "react-native-paper";
 import { StyleSheet, View, Alert } from "react-native";
-import { useRouter } from "expo-router"; // Import useRouter for navigation
+import { useRouter, useSegments } from "expo-router"; // Import useSegments
 import { usePropertyStore } from "@/stores/Property_Store";
 
 const AppBar = ({ title }) => {
   console.log("App bar is rendered");
-  const [menuVisible, setMenuVisible] = React.useState(false);
   const router = useRouter(); // Initialize router
-
-  const toggleMenu = () => setMenuVisible(!menuVisible);
-  const closeMenu = () => setMenuVisible(false);
+  const segments = useSegments(); // Get the current route segments
 
   const handleLogout = async () => {
     try {
@@ -18,7 +15,7 @@ const AppBar = ({ title }) => {
       usePropertyStore.setState({
         userLat: null,
         userLong: null,
-        properties: [],
+        properties: {},
       });
       console.log("User logged out");
 
@@ -32,6 +29,11 @@ const AppBar = ({ title }) => {
 
   return (
     <Appbar.Header statusBarHeight="5" style={styles.header}>
+      {/* Conditionally render back button only on details page */}
+      {segments.includes("details") && (
+        <Appbar.BackAction color="white" onPress={() => router.back()} />
+      )}
+
       {/* Title */}
       <Appbar.Content title={title} titleStyle={styles.title} />
 
@@ -42,7 +44,7 @@ const AppBar = ({ title }) => {
         onPress={() => router.push("/search")} // Navigate to a search page
       />
 
-      {/* Notifications Icon with Badge */}
+      {/* Map Icon */}
       <View>
         <Appbar.Action
           icon="map"
@@ -51,12 +53,9 @@ const AppBar = ({ title }) => {
         />
       </View>
 
+      {/* Logout Icon */}
       <View>
-        <Appbar.Action
-          icon="logout"
-          color="white"
-          onPress={() => handleLogout()} // Navigate to map page
-        />
+        <Appbar.Action icon="logout" color="white" onPress={handleLogout} />
       </View>
     </Appbar.Header>
   );
