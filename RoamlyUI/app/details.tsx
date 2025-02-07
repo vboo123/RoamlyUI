@@ -2,26 +2,21 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
-  Text as NativeText,
-  TouchableWithoutFeedback,
   ScrollView,
   Image,
+  TouchableOpacity,
+  Animated,
 } from "react-native";
+import { Text } from "react-native-paper";
 import AppBar from "../components/AppBar";
-import ReactLogoPng from "../assets/images/react-logo.png";
 import { usePropertyStore } from "@/stores/Property_Store";
 import { useUserStore } from "@/stores/user_store";
 import { useLocalSearchParams } from "expo-router";
-
-const imageUri =
-  "https://upload.wikimedia.org/wikipedia/commons/5/5e/Hollywood_Sign_%28Zuschnitt%29.jpg"; // Example Hollywood Sign image URL
+import * as Speech from "expo-speech";
 
 export default function Details({ navigation }) {
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const { landmarkName } = useLocalSearchParams<{
-    landmarkName: string;
-  }>();
-  console.log(landmarkName);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const { landmarkName } = useLocalSearchParams();
   const property = usePropertyStore((state) => state.properties[landmarkName]);
   const userInfo = useUserStore((state) => state.userInfo);
   const scrollRef = useRef(null);
@@ -29,8 +24,15 @@ export default function Details({ navigation }) {
   const words = textContent.split(" ");
 
   useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  useEffect(() => {
     if (property && property.responses) {
-      // Convert responses into a Record<string, any>
       const responsesRecord = Object.entries(property.responses).reduce(
         (acc, [key, value]) => {
           acc[key] = value;
@@ -38,36 +40,34 @@ export default function Details({ navigation }) {
         },
         {}
       );
+
       const trimmedLandmarkName = landmarkName.replace(" ", "");
       const trimmedCountryName = userInfo.country.replace(" ", "");
-
-      let ageRange = "";
-
-      if (Number(userInfo.age) < 25) {
-        ageRange = "young";
-      } else if (Number(userInfo.age) > 25 && Number(userInfo.age) < 60) {
-        ageRange = "medium";
-      } else {
-        ageRange = "old";
-      }
+      let ageRange =
+        Number(userInfo.age) < 25
+          ? "young"
+          : Number(userInfo.age) < 60
+            ? "medium"
+            : "old";
       const constructedKey = `${trimmedLandmarkName}_${userInfo.interestOne}_${userInfo.interestTwo}_${userInfo.interestThree}_${trimmedCountryName}_${userInfo.language}_${ageRange}_small`;
-      // Open JSON file with the same name as the constructedKey from property.response
       const response = responsesRecord[constructedKey];
-
-      if (response && response != null) {
-        // display to user
-        setTextContent(response);
-      } else {
-        // display error getting responses
-        setTextContent("Error getting responses");
-      }
+      setTextContent(response || "Error getting responses");
     }
   }, [property]);
 
-  // Handle word press event to highlight the clicked word
-  const handleWordPress = (index: number) => {
-    setHighlightedIndex(index);
+  const speakText = () => {
+    Speech.speak(textContent, {
+      language: userInfo.language || "en",
+      pitch: 1,
+      rate: 0.9,
+    });
   };
+
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+    };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -76,28 +76,18 @@ export default function Details({ navigation }) {
         ref={scrollRef}
         contentContainerStyle={styles.scrollViewContent}
       >
-        {/* Image Section */}
-        <Image source={ReactLogoPng} style={styles.image} />
+        <Animated.View style={[styles.imageContainer, { opacity: fadeAnim }]}>
+          <Image source={{ uri: property?.imageUri }} style={styles.image} />
+        </Animated.View>
 
-        {/* Text Section */}
-        <View style={styles.textContainer}>
-          {words.map((word, index) => (
-            <TouchableWithoutFeedback
-              key={index}
-              onPress={() => handleWordPress(index)} // Handle word click
-            >
-              <NativeText
-                style={[
-                  styles.word,
-                  index === highlightedIndex && styles.highlightedWord, // Highlight clicked word
-                ]}
-              >
-                {word + " "}
-              </NativeText>
-            </TouchableWithoutFeedback>
-          ))}
-        </View>
+        <Animated.View style={[styles.textContainer, { opacity: fadeAnim }]}>
+          <Text style={styles.description}>{textContent}</Text>
+        </Animated.View>
       </ScrollView>
+
+      <TouchableOpacity style={styles.speakButton} onPress={speakText}>
+        <Text style={styles.speakButtonText}>🔊 Listen</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -105,41 +95,53 @@ export default function Details({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3f4f9", // Light background
+    backgroundColor: "#f3f4f9",
   },
   scrollViewContent: {
     padding: 20,
+    alignItems: "center",
   },
-  image: {
+  imageContainer: {
     width: "100%",
-    height: 200,
-    borderRadius: 10,
+    alignItems: "center",
     marginBottom: 20,
   },
+  image: {
+    width: "90%",
+    height: 250,
+    borderRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
   textContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
     backgroundColor: "#fff",
     padding: 16,
     borderRadius: 10,
-    elevation: 3, // Shadow for Android
-    shadowColor: "#000", // Shadow for iOS
+    elevation: 3,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    width: "90%",
   },
-  word: {
+  description: {
     fontSize: 18,
-    marginHorizontal: 4,
-    marginVertical: 6,
     color: "#333",
     textAlign: "center",
   },
-  highlightedWord: {
-    backgroundColor: "#FFD700", // Golden yellow
-    color: "#333",
-    fontWeight: "600",
-    borderRadius: 5,
-    paddingHorizontal: 4,
+  speakButton: {
+    position: "absolute",
+    bottom: 30,
+    alignSelf: "center",
+    backgroundColor: "#6200EE",
+    padding: 15,
+    borderRadius: 30,
+  },
+  speakButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
