@@ -42,7 +42,7 @@ export default function MapScreen() {
           {/* If params are provided, display the single property marker */}
           {!itemLatitude &&
             !itemLongitude &&
-            properties.map((property, index) => (
+            Object.values(properties).map((property, index) => (
               <Marker
                 key={index}
                 coordinate={{
