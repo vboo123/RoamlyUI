@@ -1,16 +1,30 @@
 import { create } from "zustand";
 
+// Define the property schema
+interface Property {
+  id: string;
+  name: string;
+  location?: string;
+  [key: string]: any; // Allow additional dynamic fields
+}
+
+interface PropertyState {
+  userLat: number | null;
+  userLong: number | null;
+  properties: Record<string, Property>; // Stores properties by ID
+  setUserLocation: (lat: number, long: number) => void;
+  addProperty: (id: string, newProperty: Property) => void;
+  removeProperty: (id: string) => void;
+}
+
 // Zustand Store
-export const usePropertyStore = create((set) => ({
-  property: "Default Property",
-  // Define properties as a Record with string keys and propertySchema as values
-  properties: {},
+export const usePropertyStore = create<PropertyState>((set) => ({
   userLat: null,
   userLong: null,
+  properties: {},
 
-  setProperty: (property) => set({ property }),
+  setUserLocation: (lat, long) => set({ userLat: lat, userLong: long }),
 
-  // Add a property by using an object key-value pair
   addProperty: (id, newProperty) =>
     set((state) => ({
       properties: { ...state.properties, [id]: newProperty },

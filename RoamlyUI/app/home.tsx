@@ -4,7 +4,7 @@ import { Card, Text, Button } from "react-native-paper";
 import AppBar from "../components/AppBar";
 import { useRouter } from "expo-router"; // Import the router
 import GrifithObsv from "../assets/images/grifith-obsv.jpeg";
-import { usePropertyStore } from "@/stores/Property_Store";
+import { usePropertyStore } from "@/stores/property_store";
 
 export default function Home({ navigation }) {
   const router = useRouter();

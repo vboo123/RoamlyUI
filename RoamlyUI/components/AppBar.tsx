@@ -2,7 +2,7 @@ import React from "react";
 import { Appbar } from "react-native-paper";
 import { StyleSheet, View, Alert } from "react-native";
 import { useRouter, useSegments } from "expo-router"; // Import useSegments
-import { usePropertyStore } from "@/stores/Property_Store";
+import { usePropertyStore } from "@/stores/property_store";
 
 const AppBar = ({ title }) => {
   console.log("App bar is rendered");
