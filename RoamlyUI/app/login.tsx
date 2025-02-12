@@ -6,6 +6,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Text,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Button, TextInput, Headline, Divider } from "react-native-paper";
@@ -163,6 +164,14 @@ export default function Login() {
             Login
           </Button>
         )}
+        <View style={styles.registerContainer}>
+          <Text>
+            Don't have an account?{" "}
+            <Text style={styles.link} onPress={() => router.push("/register")}>
+              Register here
+            </Text>
+          </Text>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -198,15 +207,15 @@ const styles = StyleSheet.create({
     marginTop: 10,
     backgroundColor: "#6200ee",
   },
-  googleButton: {
-    marginTop: 10,
-    backgroundColor: "#db4437",
-  },
   buttonContent: {
     paddingVertical: 8,
   },
-  registerButton: {
-    marginTop: 10,
-    alignSelf: "center",
+  registerContainer: {
+    marginTop: 15,
+    alignItems: "center",
+  },
+  link: {
+    color: "#6200ee",
+    fontWeight: "bold",
   },
 });

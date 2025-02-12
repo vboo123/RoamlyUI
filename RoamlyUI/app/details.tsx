@@ -13,6 +13,7 @@ import { usePropertyStore } from "@/stores/property_store";
 import { useUserStore } from "@/stores/user_store";
 import { useLocalSearchParams } from "expo-router";
 import * as Speech from "expo-speech";
+import GrifithObsv from "../assets/images/grifith-obsv.jpeg";
 
 export default function Details({ navigation }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -21,8 +22,14 @@ export default function Details({ navigation }) {
   const userInfo = useUserStore((state) => state.userInfo);
   const scrollRef = useRef(null);
   const [textContent, setTextContent] = useState("");
-  const words = textContent.split(" ");
 
+  useEffect(() => {
+    const fetchVoices = async () => {
+      const voices = await Speech.getAvailableVoicesAsync();
+      console.log(voices); // Log available voices on the device
+    };
+    fetchVoices();
+  }, []);
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -51,15 +58,24 @@ export default function Details({ navigation }) {
             : "old";
       const constructedKey = `${trimmedLandmarkName}_${userInfo.interestOne}_${userInfo.interestTwo}_${userInfo.interestThree}_${trimmedCountryName}_${userInfo.language}_${ageRange}_small`;
       const response = responsesRecord[constructedKey];
+      console.log(response);
       setTextContent(response || "Error getting responses");
     }
   }, [property]);
 
   const speakText = () => {
     Speech.speak(textContent, {
-      language: userInfo.language || "en",
-      pitch: 1,
-      rate: 0.9,
+      language: "en-US",
+      pitch: 0.75,
+      rate: 1.1,
+      voice: "com.apple.voice.compact.ar-001.siri",
+      volume: 1.0,
+      onDone: () => {
+        console.log("Finished speaking.");
+      },
+      onError: (error) => {
+        console.error("An error occurred:", error);
+      },
     });
   };
 
@@ -77,7 +93,7 @@ export default function Details({ navigation }) {
         contentContainerStyle={styles.scrollViewContent}
       >
         <Animated.View style={[styles.imageContainer, { opacity: fadeAnim }]}>
-          <Image source={{ uri: property?.imageUri }} style={styles.image} />
+          <Image source={GrifithObsv} style={styles.image} />
         </Animated.View>
 
         <Animated.View style={[styles.textContainer, { opacity: fadeAnim }]}>
