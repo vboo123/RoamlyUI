@@ -53,8 +53,8 @@ export default function Login() {
     }
 
     let apiURI = userInfo
-      ? `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=${userInfo.interestOne}&interestTwo=${userInfo.interestTwo}&interestThree=${userInfo.interestThree}&userAge=${userInfo.age}&userCountry=${userInfo.country}&userLanguage=${userInfo.language}`
-      : `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`;
+      ? `http://192.168.1.68:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=${userInfo.interestOne}&interestTwo=${userInfo.interestTwo}&interestThree=${userInfo.interestThree}&userAge=${userInfo.age}&userCountry=${userInfo.country}&userLanguage=${userInfo.language}`
+      : `http://192.168.1.68:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`;
 
     try {
       console.log("Fetching properties...");
@@ -94,7 +94,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const url = `http://192.168.1.78:8000/login/?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+      const url = `http://192.168.1.68:8000/login/?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
       const response = await fetch(url, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
