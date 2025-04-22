@@ -51,13 +51,14 @@ export default function Login() {
       console.log("Waiting for location...");
       return;
     }
+    console.log("userInfo is \n");
+    console.log(userInfo);
 
     let apiURI = userInfo
-      ? `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=${userInfo.interestOne}&interestTwo=${userInfo.interestTwo}&interestThree=${userInfo.interestThree}&userAge=${userInfo.age}&userCountry=${userInfo.country}&userLanguage=${userInfo.language}`
-      : `http://192.168.1.78:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`;
+      ? `http://192.168.1.68:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=${userInfo.interestOne}&interestTwo=${userInfo.interestTwo}&interestThree=${userInfo.interestThree}&userAge=${userInfo.age}&userCountry=${userInfo.country}&userLanguage=${userInfo.language}`
+      : `http://192.168.1.68:8000/get-properties/?lat=${userLat}&long=${userLong}&interestOne=Drawing&interestTwo=Running&interestThree=Acting&userAge=21&userCountry=UnitedStatesofAmerica&userLanguage=English`;
 
     try {
-      console.log("Fetching properties...");
       const response = await fetch(apiURI, { method: "GET" });
 
       if (!response.ok) {
@@ -67,6 +68,7 @@ export default function Login() {
       const data = await response.json();
 
       if (data && data.properties) {
+        console.log("enter here!!!!");
         Object.values(data.properties).forEach((item) =>
           addProperty(item.landmarkName, item)
         );
@@ -94,7 +96,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const url = `http://192.168.1.78:8000/login/?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+      const url = `http://192.168.1.68:8000/login/?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
       const response = await fetch(url, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -104,15 +106,17 @@ export default function Login() {
       if (response.ok) {
         useUserStore.setState({
           userInfo: {
-            user_id: data[0],
-            name: data[1],
-            interestOne: data[2],
-            interestTwo: data[3],
-            interestThree: data[4],
-            age: data[5],
+            user_id: data.user_id,
+            name: data.name,
+            interestOne: data.interestOne,
+            interestTwo: data.interestTwo,
+            interestThree: data.interestThree,
+            age: data.age,
             country:
-              data[6] === "United States" ? "UnitedStatesofAmerica" : data[6],
-            language: data[7],
+              data.country === "United States"
+                ? "UnitedStatesofAmerica"
+                : data.country,
+            language: data.language,
           },
         });
         await getUserLocation();
