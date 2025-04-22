@@ -38,30 +38,64 @@ export default function Details({ navigation }) {
     }).start();
   }, []);
 
-  useEffect(() => {
-    if (property && property.responses) {
-      const responsesRecord = Object.entries(property.responses).reduce(
-        (acc, [key, value]) => {
-          acc[key] = value;
-          return acc;
-        },
-        {}
-      );
+  // useEffect(() => {
+  //   if (property && property.responses) {
+  //     const responsesRecord = Object.entries(property.responses).reduce(
+  //       (acc, [key, value]) => {
+  //         acc[key] = value;
+  //         return acc;
+  //       },
+  //       {}
+  //     );
 
-      const trimmedLandmarkName = landmarkName.replace(" ", "");
-      const trimmedCountryName = userInfo.country.replace(" ", "");
-      let ageRange =
-        Number(userInfo.age) < 25
-          ? "young"
-          : Number(userInfo.age) < 60
-            ? "medium"
-            : "old";
-      const constructedKey = `${trimmedLandmarkName}_${userInfo.interestOne}_${userInfo.interestTwo}_${userInfo.interestThree}_${trimmedCountryName}_${userInfo.language}_${ageRange}_small`;
-      const response = responsesRecord[constructedKey];
-      console.log(response);
-      setTextContent(response || "Error getting responses");
-    }
-  }, [property]);
+  //     const trimmedLandmarkName = landmarkName.replace(" ", "");
+  //     const trimmedCountryName = userInfo.country.replace(" ", "");
+  //     let ageRange =
+  //       Number(userInfo.age) < 25
+  //         ? "young"
+  //         : Number(userInfo.age) < 60
+  //           ? "medium"
+  //           : "old";
+  //     const constructedKey = `${trimmedLandmarkName}_${userInfo.interestOne}_${userInfo.interestTwo}_${userInfo.interestThree}_${trimmedCountryName}_${userInfo.language}_${ageRange}_small`;
+  //     const response = responsesRecord[constructedKey];
+  //     console.log(response);
+  //     setTextContent(response || "Error getting responses");
+  //   }
+  // }, [property]);
+
+  useEffect(() => {
+    const fetchLandmarkResponse = async () => {
+      if (!landmarkName || !userInfo) return;
+
+      const baseUrl = "http://192.168.1.78:8000/landmark-response";
+      const url = `${baseUrl}?landmark=${encodeURIComponent(
+        landmarkName
+      )}&userCountry=${encodeURIComponent(
+        userInfo.country
+      )}&interestOne=${encodeURIComponent(
+        userInfo.interestOne
+      )}&interestTwo=${encodeURIComponent(
+        userInfo.interestTwo
+      )}&interestThree=${encodeURIComponent(userInfo.interestThree)}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (res.ok && data.response) {
+          console.log("🎯 Landmark response received:", data.response);
+          setTextContent(data.response);
+        } else {
+          console.warn("⚠️ Unexpected response:", data);
+          setTextContent("Sorry, we couldn't load a description.");
+        }
+      } catch (error) {
+        console.error("❌ Error fetching landmark response:", error.message);
+        setTextContent("Failed to load landmark details.");
+      }
+    };
+
+    fetchLandmarkResponse();
+  }, [landmarkName, userInfo]);
 
   const speakText = () => {
     Speech.speak(textContent, {

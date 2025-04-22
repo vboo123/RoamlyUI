@@ -72,7 +72,7 @@ const Profile = () => {
     try {
       // Send updated data to the server
       const response = await axios.post(
-        "http://192.168.1.68:8000/update-profile",
+        "http://192.168.1.78:8000/update-profile",
         updatedData
       );
       Alert.alert("Success", "Profile updated successfully!");
@@ -86,7 +86,7 @@ const Profile = () => {
     try {
       // Send billing information to the server
       const response = await axios.post(
-        "http://192.168.1.68:8000/update-billing",
+        "http://192.168.1.78:8000/update-billing",
         billingInfo
       );
       Alert.alert("Success", "Billing information updated!");
