@@ -12,8 +12,8 @@ import AppBar from "../components/AppBar";
 import { usePropertyStore } from "@/stores/property_store";
 import { useUserStore } from "@/stores/user_store";
 import { useLocalSearchParams } from "expo-router";
-import * as Speech from "expo-speech";
 import GrifithObsv from "../assets/images/grifith-obsv.jpeg";
+import { Audio } from "expo-av";
 
 export default function Details({ navigation }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -22,14 +22,8 @@ export default function Details({ navigation }) {
   const userInfo = useUserStore((state) => state.userInfo);
   const scrollRef = useRef(null);
   const [textContent, setTextContent] = useState("");
+  const [sound, setSound] = useState(null);
 
-  useEffect(() => {
-    const fetchVoices = async () => {
-      const voices = await Speech.getAvailableVoicesAsync();
-      console.log(voices); // Log available voices on the device
-    };
-    fetchVoices();
-  }, []);
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -37,31 +31,6 @@ export default function Details({ navigation }) {
       useNativeDriver: true,
     }).start();
   }, []);
-
-  // useEffect(() => {
-  //   if (property && property.responses) {
-  //     const responsesRecord = Object.entries(property.responses).reduce(
-  //       (acc, [key, value]) => {
-  //         acc[key] = value;
-  //         return acc;
-  //       },
-  //       {}
-  //     );
-
-  //     const trimmedLandmarkName = landmarkName.replace(" ", "");
-  //     const trimmedCountryName = userInfo.country.replace(" ", "");
-  //     let ageRange =
-  //       Number(userInfo.age) < 25
-  //         ? "young"
-  //         : Number(userInfo.age) < 60
-  //           ? "medium"
-  //           : "old";
-  //     const constructedKey = `${trimmedLandmarkName}_${userInfo.interestOne}_${userInfo.interestTwo}_${userInfo.interestThree}_${trimmedCountryName}_${userInfo.language}_${ageRange}_small`;
-  //     const response = responsesRecord[constructedKey];
-  //     console.log(response);
-  //     setTextContent(response || "Error getting responses");
-  //   }
-  // }, [property]);
 
   useEffect(() => {
     const fetchLandmarkResponse = async () => {
@@ -82,7 +51,6 @@ export default function Details({ navigation }) {
         const res = await fetch(url);
         const data = await res.json();
         if (res.ok && data.response) {
-          console.log("🎯 Landmark response received:", data.response);
           setTextContent(data.response);
         } else {
           console.warn("⚠️ Unexpected response:", data);
@@ -97,27 +65,40 @@ export default function Details({ navigation }) {
     fetchLandmarkResponse();
   }, [landmarkName, userInfo]);
 
-  const speakText = () => {
-    Speech.speak(textContent, {
-      language: "en-US",
-      pitch: 0.75,
-      rate: 1.1,
-      voice: "com.apple.voice.compact.ar-001.siri",
-      volume: 1.0,
-      onDone: () => {
-        console.log("Finished speaking.");
-      },
-      onError: (error) => {
-        console.error("An error occurred:", error);
-      },
-    });
-  };
-
   useEffect(() => {
-    return () => {
-      Speech.stop();
+    const speakFromApi = async () => {
+      if (!textContent) return;
+
+      console.log("sending text content");
+
+      try {
+        const response = await fetch(
+          `http://192.168.1.78:8002/generate-audio?text=${encodeURIComponent(
+            textContent
+          )}`
+        );
+        const { sound } = await Audio.Sound.createAsync({ uri: response.url });
+        setSound(sound);
+        await sound.playAsync();
+      } catch (err) {
+        console.error("TTS audio failed:", err);
+      }
     };
-  }, []);
+
+    speakFromApi();
+
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [textContent]);
+
+  const replayAudio = async () => {
+    if (sound) {
+      await sound.replayAsync();
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -135,8 +116,8 @@ export default function Details({ navigation }) {
         </Animated.View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.speakButton} onPress={speakText}>
-        <Text style={styles.speakButtonText}>🔊 Listen</Text>
+      <TouchableOpacity style={styles.speakButton} onPress={replayAudio}>
+        <Text style={styles.speakButtonText}>🔊 Replay</Text>
       </TouchableOpacity>
     </View>
   );
