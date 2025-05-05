@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { Text } from "react-native-paper";
 import AppBar from "../components/AppBar";
@@ -22,7 +23,9 @@ export default function Details({ navigation }) {
   const userInfo = useUserStore((state) => state.userInfo);
   const scrollRef = useRef(null);
   const [textContent, setTextContent] = useState("");
+  const [audioUrl, setAudioUrl] = useState(null);
   const [sound, setSound] = useState(null);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -50,8 +53,10 @@ export default function Details({ navigation }) {
       try {
         const res = await fetch(url);
         const data = await res.json();
-        if (res.ok && data.response) {
-          setTextContent(data.response);
+        console.log(data);
+        if (res.ok && data.text) {
+          setTextContent(data.text);
+          setAudioUrl(data.audio_url || null);
         } else {
           console.warn("⚠️ Unexpected response:", data);
           setTextContent("Sorry, we couldn't load a description.");
@@ -66,33 +71,38 @@ export default function Details({ navigation }) {
   }, [landmarkName, userInfo]);
 
   useEffect(() => {
-    const speakFromApi = async () => {
-      if (!textContent) return;
+    const playAudio = async () => {
+      if (!audioUrl) return;
 
-      console.log("sending text content");
+      setIsAudioLoading(true);
 
       try {
-        const response = await fetch(
-          `http://192.168.1.78:8002/generate-audio?text=${encodeURIComponent(
-            textContent
-          )}`
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: audioUrl },
+          { shouldPlay: true }, // auto-play once loaded
+          undefined,
+          true // download first
         );
-        const { sound } = await Audio.Sound.createAsync({ uri: response.url });
         setSound(sound);
-        await sound.playAsync();
       } catch (err) {
-        console.error("TTS audio failed:", err);
+        console.error("🔇 Failed to play audio:", err);
+        Alert.alert(
+          "Audio Error",
+          "Unable to play the audio. It may not be fully ready yet."
+        );
+      } finally {
+        setIsAudioLoading(false);
       }
     };
 
-    speakFromApi();
+    playAudio();
 
     return () => {
       if (sound) {
         sound.unloadAsync();
       }
     };
-  }, [textContent]);
+  }, [audioUrl]);
 
   const replayAudio = async () => {
     if (sound) {
@@ -114,11 +124,26 @@ export default function Details({ navigation }) {
         <Animated.View style={[styles.textContainer, { opacity: fadeAnim }]}>
           <Text style={styles.description}>{textContent}</Text>
         </Animated.View>
+
+        {isAudioLoading && (
+          <ActivityIndicator
+            size="large"
+            color="#6200EE"
+            style={{ marginTop: 20 }}
+          />
+        )}
+        {!audioUrl && (
+          <Text style={{ color: "#888", marginTop: 20 }}>
+            No audio available for this landmark.
+          </Text>
+        )}
       </ScrollView>
 
-      <TouchableOpacity style={styles.speakButton} onPress={replayAudio}>
-        <Text style={styles.speakButtonText}>🔊 Replay</Text>
-      </TouchableOpacity>
+      {audioUrl && (
+        <TouchableOpacity style={styles.speakButton} onPress={replayAudio}>
+          <Text style={styles.speakButtonText}>🔊 Replay</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
