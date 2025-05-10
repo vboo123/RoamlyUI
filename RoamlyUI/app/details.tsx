@@ -39,7 +39,7 @@ export default function Details({ navigation }) {
     const fetchLandmarkResponse = async () => {
       if (!landmarkName || !userInfo || !property?.geohash) return;
 
-      const baseUrl = "http://192.168.1.78:8000/landmark-response";
+      const baseUrl = "https://roamlyservice.onrender.com/landmark-response";
       const url = `${baseUrl}?landmark=${encodeURIComponent(
         landmarkName
       )}&geohash=${encodeURIComponent(
