@@ -4,7 +4,7 @@ import MapView, { Callout, Marker } from "react-native-maps";
 import { Text, Button } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
-import { usePropertyStore } from "@/stores/property_store";
+import { usePropertyStore } from "@/stores/Property_Store";
 
 export default function MapScreen() {
   const properties = usePropertyStore((state) => state.properties);

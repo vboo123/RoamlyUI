@@ -11,7 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import { Button, TextInput, Headline, Divider } from "react-native-paper";
 import * as Location from "expo-location";
-import { usePropertyStore } from "@/stores/property_store";
+import { usePropertyStore } from "@/stores/Property_Store";
 import { useUserStore } from "@/stores/user_store";
 
 export default function Login() {
