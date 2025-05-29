@@ -37,13 +37,11 @@ export default function Details({ navigation }) {
 
   useEffect(() => {
     const fetchLandmarkResponse = async () => {
-      if (!landmarkName || !userInfo || !property?.geohash) return;
+      if (!landmarkName || !userInfo) return;
 
       const baseUrl = "http://192.168.1.78:8000/landmark-response";
       const url = `${baseUrl}?landmark=${encodeURIComponent(
         landmarkName
-      )}&geohash=${encodeURIComponent(
-        property.geohash
       )}&userCountry=${encodeURIComponent(
         userInfo.country
       )}&interestOne=${encodeURIComponent(
@@ -70,7 +68,7 @@ export default function Details({ navigation }) {
     };
 
     fetchLandmarkResponse();
-  }, [landmarkName, userInfo, property]);
+  }, [landmarkName, userInfo]);
 
   useEffect(() => {
     const playAudio = async () => {
@@ -81,9 +79,9 @@ export default function Details({ navigation }) {
       try {
         const { sound } = await Audio.Sound.createAsync(
           { uri: audioUrl },
-          { shouldPlay: true },
+          { shouldPlay: true }, // auto-play once loaded
           undefined,
-          true
+          true // download first
         );
         setSound(sound);
       } catch (err) {
