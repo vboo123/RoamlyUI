@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Text } from "react-native-paper";
 import AppBar from "../components/AppBar";
-import { usePropertyStore } from "@/stores/Property_Store";
+import { usePropertyStore } from "@/stores/property_store";
 import { useUserStore } from "@/stores/user_store";
 import { useLocalSearchParams } from "expo-router";
 import GrifithObsv from "../assets/images/grifith-obsv.jpeg";
