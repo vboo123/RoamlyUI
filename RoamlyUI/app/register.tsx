@@ -68,7 +68,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "https://roamlyservice.onrender.com/register-user/",
+        "http://192.168.1.78:8000/register-user/",
         userData
       );
       Alert.alert(
